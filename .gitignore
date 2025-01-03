@@ -1,0 +1,31 @@
+# Node.js 관련
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# 환경 변수 파일
+.env
+
+# Docker 관련
+docker-compose.override.yml
+docker-compose.override.yaml
+docker-compose.local.yml
+docker-compose.local.yaml
+.docker/
+
+# Next.js 빌드 파일
+.next/
+out/
+
+# PHP 관련
+vendor/
+
+# 로그 파일
+*.log
+
+# IDE 관련
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
