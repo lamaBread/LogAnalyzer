@@ -35,4 +35,9 @@
 2. Docker의 Next.js 컨테이너는 localhost:8445:3000 리슨 중. (apache=8445 -> Next.js=3000)
 3. 즉, Next.js가 로그 해석기의 메인페이지를 서비스 함. SSR 방식으로 바로 웹페이지를 전송할 것.
 
-###### 최종 수정일: 2024-12-28
+### 새로 생성한 파일의 접근 권한 문제 발생시를 위한 기록
+```bash
+sudo chown -R :log-analyzer-devgroup /var/www/log-analyzer
+```
+
+###### 최종 수정일: 2025-01-09

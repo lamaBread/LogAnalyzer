@@ -63,10 +63,18 @@ export default function RootLayout({
                 </div>
                 <li>
                   <Link
-                    href="/specific/main_menu/search"
+                    href="/specific/main_menu/ai_search"
                     className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
                   >
                     🔎 AI Search
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/specific/main_menu/search"
+                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                  >
+                    🔎 Search
                   </Link>
                 </li>
                 <li>
@@ -94,55 +102,12 @@ export default function RootLayout({
                   </Link>
                 </li>
                 <li>
-                  <div>
-                    <details className="group mt-1">
-                      <summary className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors">
-                        📁 Status Codes
-                      </summary>
-                      <ul className="pl-4 space-y-2">
-                        <li>
-                          <Link
-                            href="/specific/main_menu/code_100"
-                            className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                          >
-                            Status Code 100
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            href="/specific/main_menu/code_200"
-                            className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                          >
-                            Status Code 200
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            href="/specific/main_menu/code_300"
-                            className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                          >
-                            Status Code 300
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            href="/specific/main_menu/code_400"
-                            className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                          >
-                            Status Code 400
-                          </Link>
-                        </li>
-                        <li>
-                          <Link
-                            href="/specific/main_menu/code_500"
-                            className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                          >
-                            Status Code 500
-                          </Link>
-                        </li>
-                      </ul>
-                    </details>
-                  </div>
+                  <Link
+                    href="/specific/main_menu/code_200"
+                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                  >
+                    Status Codes
+                  </Link>
                 </li>
                 <div>
                   <h1 className="font-bold">PREFERENCE</h1>
