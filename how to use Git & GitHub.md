@@ -164,17 +164,19 @@
    ```sh
    git clone https://github.com/lamaBread/LogAnalyzer.git
    cd LogAnalyzer
-   npm.cmd install
    ```
 
 - Docker 환경 구축 이후 작업 과정
    ```sh
-   git pull
-   docker compose up -d --build  //PowerShell 에서는 조금 다를 수 있음.
-   //작업 시작.
+   git pull  //최신 자료 다운로드 (새롭게 clone 해도 된다.)
+   docker compose up -d  //-d 옵션은 백그라운드 실행이다.
 
-   //작업 종료
-   git add -u .  //모든 변경사항 반영
+   //작업 시작 및 종료.
+
+   git add .  //생성 및 변경사항 반영
+
+   // git status   <-- 이 명령 실행 결과 모두 녹색이 되었는지 확인. 붉은 글씨로 삭제 사항을 반영하라고 띄워주는 경우 'git add -u .' 명령으로 삭제사항 반영할 것.
+
    git commit -m "작업내용 설명"
    git push
    ```
