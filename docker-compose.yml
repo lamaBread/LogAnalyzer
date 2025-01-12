@@ -41,7 +41,9 @@ services:
 
   # Ollama 서비스 (AI 모델 API)
   ollama:
-    image: ollama/ollama # Ollama 공식 Docker 이미지 사용
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
     container_name: ollama # Docker 컨테이너 이름
     expose:
       - "11434" # Ollama API의 기본 포트

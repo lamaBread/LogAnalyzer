@@ -1,7 +1,7 @@
 <?php
 
 // $pattern 에 맟는 파일을 읽어서 $outputFile 에 병합하는 함수.
-function aggregateLogs($logDir, $outputFile, $pattern) {
+function aggregateLogs($logDir, $outputFile, $logRoot, $pattern) {
     if (!is_dir($logDir)) {
         //echo "Log directory not found: $logDir\n";
         return;
@@ -22,9 +22,9 @@ function aggregateLogs($logDir, $outputFile, $pattern) {
 
     // Write to the output file.
     if (file_put_contents($outputFile, $output) !== false) {
-        readLogs_log(true, $files);
+        readLogs_log(true, $files, $logRoot);
     } else {
-        readLogs_log(false, $files);
+        readLogs_log(false, $files, $logRoot);
     }
 }
 
@@ -38,8 +38,8 @@ function gzfile_get_contents($file) {
     return $content;
 }
 
-function readLogs_log($is_success, $files){
-    $log = "readLogs.log";
+function readLogs_log($is_success, $files, $logRoot){
+    $log = $logRoot . "/readLogs.log";
     $log_content = date("Y-m-d H:i:s");
     if($is_success){
         $log_content .= " - Success - ".implode(", ", $files)."\n";
