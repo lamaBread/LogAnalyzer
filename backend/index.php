@@ -1,6 +1,3 @@
-<?php
-    die();
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,9 +6,6 @@
     <title>API TEST PAGE</title>
 </head>
 <body>
-    <form action="/APIs/readLogs.php" method="post">
-        <input type="password" name="password" placeholder="password">
-        <input type="submit" value="submit">
-    </form>
+    <h1>API TEST PAGE</h1>
 </body>
 </html>
