@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 
 export async function MainPageCall() {
   try {
-    const response = await fetch('http://localhost:3000/APIs/page_APIs/mainPage.php', {
+    const response = await fetch('http://localhost:8445/APIs/page_APIs/mainPage.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
