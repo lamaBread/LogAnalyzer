@@ -2,41 +2,30 @@
 
 import React, { useState } from "react";
 
-export default function AISearchPage() {
+// 100번부터 500번까지의 로그와 설명 생성
+const mockData = Array.from({ length: 401 }, (_, i) => {
+  const logNumber = i + 100; // 100부터 시작
+  return {
+    log: `Log entry ${logNumber}: Example log message ${logNumber}.`,
+    description: `로그 ${logNumber}에 대한 설명입니다.`,
+  };
+});
+
+export default function SearchPage() {
   const [query, setQuery] = useState<string>(""); // 검색어 상태
-  const [results, setResults] = useState<string[]>([]); // AI 검색 결과 상태
-  const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
-  const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
+  const [results, setResults] = useState<typeof mockData>([]); // 검색 결과 상태
   const [history, setHistory] = useState<string[]>([]); // 검색 기록 상태
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (!query.trim()) return; // 빈 검색어 무시
 
-    setLoading(true); // 로딩 시작
-    setError(null); // 에러 초기화
+    // 검색 결과 필터링
+    const filteredResults = mockData.filter((item) =>
+      item.log.toLowerCase().includes(query.toLowerCase())
+    );
 
-    try {
-      // AI API 호출
-      const response = await fetch("/api/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setResults([data.result]); // AI의 결과를 받아와서 표시
-        setHistory((prev) => [...prev, query]); // 검색 기록에 추가
-      } else {
-        setResults(["Error fetching AI results."]);
-      }
-    } catch (error) {
-      setResults(["Error: Could not connect to the API."]);
-    } finally {
-      setLoading(false); // 로딩 완료
-    }
+    setResults(filteredResults); // 검색 결과 업데이트
+    setHistory((prev) => [...prev, query]); // 검색 기록에 추가
   };
 
   // 엔터 키를 눌렀을 때 검색 함수 실행
@@ -48,7 +37,7 @@ export default function AISearchPage() {
 
   return (
     <div className="flex flex-col h-screen p-4">
-      <h1 className="text-3xl font-bold mb-4">AI Log Search</h1>
+      <h1 className="text-3xl font-bold mb-4">Log Search</h1>
 
       {/* 검색 입력 필드 */}
       <div className="flex mb-4">
@@ -68,18 +57,15 @@ export default function AISearchPage() {
         </button>
       </div>
 
-      {/* 로딩 중 표시 */}
-      {loading && <p>Loading...</p>}
-
-      {/* 에러 메시지 */}
-      {error && <p className="text-red-500">{error}</p>}
-
       {/* 검색 결과 */}
       <div>
         {results.length > 0 ? (
-          <ul className="list-disc list-inside text-xl">
+          <ul className="space-y-4">
             {results.map((result, index) => (
-              <li key={index}>{result}</li>
+              <li key={index} className="p-4 border rounded-md bg-gray-100 dark:bg-gray-800">
+                <p className="text-xl font-semibold">{result.log}</p>
+                <p className="text-gray-600 dark:text-gray-400">{result.description}</p>
+              </li>
             ))}
           </ul>
         ) : (

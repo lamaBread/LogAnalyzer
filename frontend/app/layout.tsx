@@ -79,7 +79,7 @@ export default function RootLayout({
                 </li>
                 <li>
                   <Link
-                    href="/specific/main_menu/nomal_access"
+                    href="/specific/main_menu/normal_access"
                     className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
                   >
                     🟢 Normal Access
