@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { MainPageCall } from './lib/mainpageCall';
+import { PageCall } from './lib/pageCall';
 
 export default function Page() {
   const [variable1, setVariable1] = useState<string | null>(null);
@@ -10,7 +10,7 @@ export default function Page() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await MainPageCall();
+        const data = await PageCall('mainPage');
         
         
         setVariable1(data.mainText);

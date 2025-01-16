@@ -5,7 +5,7 @@ include_once '__authCode.php';  // POST 검증 & 인증코드 검증
 $output = <<<EOD
     <!-- API 작동 검증 용도의 html 문서입니다. -->
     <div className="mainText">
-        <h2>nomal page</h2>
+        <h2>normal page</h2>
     </div>
 EOD;
 

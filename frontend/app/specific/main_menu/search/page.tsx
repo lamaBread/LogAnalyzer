@@ -1,45 +1,52 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export default function AISearchPage() {
+export default function SearchPage() {
   const [query, setQuery] = useState<string>(""); // 검색어 상태
-  const [results, setResults] = useState<string[]>([]); // AI 검색 결과 상태
+  const [results, setResults] = useState<string[]>([]); // 로컬 검색 결과 상태
   const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
   const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
   const [history, setHistory] = useState<string[]>([]); // 검색 기록 상태
+  const [localData, setLocalData] = useState<string[]>([]); // PHP 파일에서 불러온 데이터 상태
 
-  const handleSearch = async () => {
-    if (!query.trim()) return; // 빈 검색어 무시
+  useEffect(() => {
+    // PHP 서버에서 로그 데이터를 가져오는 API 호출
+    fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php")  // 실제 PHP 파일 경로를 입력하세요
+      .then((response) => response.json())
+      .then((data) => setLocalData(data)) // PHP에서 받은 로그 데이터를 상태에 저장
+      .catch((error) => {
+        console.error("PHP 데이터를 읽는 중 오류 발생", error);
+        setError("PHP 파일을 불러오는 중 오류가 발생했습니다.");
+      });
+  }, []);
 
-    setLoading(true); // 로딩 시작
-    setError(null); // 에러 초기화
+  const handleSearch = () => {
+    if (!query.trim()) return;
+
+    setLoading(true);
+    setError(null);
 
     try {
-      // AI API 호출
-      const response = await fetch("/api/search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-      });
+      // PHP에서 불러온 데이터에서 검색
+      const filteredResults = localData.filter((entry) =>
+        entry.toLowerCase().includes(query.toLowerCase()) // 검색어가 포함된 항목 필터링
+      );
 
-      if (response.ok) {
-        const data = await response.json();
-        setResults([data.result]); // AI의 결과를 받아와서 표시
-        setHistory((prev) => [...prev, query]); // 검색 기록에 추가
+      if (filteredResults.length > 0) {
+        setResults(filteredResults);
       } else {
-        setResults(["Error fetching AI results."]);
+        setResults(["검색 결과가 없습니다."]);
       }
+
+      setHistory((prev) => [...prev, query]);
     } catch (error) {
-      setResults(["Error: Could not connect to the API."]);
+      setError("검색 중 오류가 발생했습니다.");
     } finally {
-      setLoading(false); // 로딩 완료
+      setLoading(false);
     }
   };
 
-  // 엔터 키를 눌렀을 때 검색 함수 실행
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch();
@@ -48,17 +55,16 @@ export default function AISearchPage() {
 
   return (
     <div className="flex flex-col h-screen p-4">
-      <h1 className="text-3xl font-bold mb-4">AI Log Search</h1>
+      <h1 className="text-3xl font-bold mb-4">Log Search</h1>
 
-      {/* 검색 입력 필드 */}
       <div className="flex mb-4">
         <input
           type="text"
           placeholder="검색어를 입력하세요"
-          value={query} // 상태와 입력 값 연결
-          onChange={(e) => setQuery(e.target.value)} // 입력 값 변경 시 상태 업데이트
-          onKeyDown={handleKeyDown} // 엔터 키 눌렀을 때 검색
-          className="flex-grow p-4 border-2 rounded-md mr-4 text-xl border-gray-300 dark:border-gray-700 text-black bg-white dark:bg-gray-800 dark:text-gray-200"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
+          className="flex-grow p-4 border-2 rounded-md mr-4 text-xl"
         />
         <button
           onClick={handleSearch}
@@ -68,13 +74,9 @@ export default function AISearchPage() {
         </button>
       </div>
 
-      {/* 로딩 중 표시 */}
-      {loading && <p>Loading...</p>}
-
-      {/* 에러 메시지 */}
+      {loading && <p>로딩 중...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* 검색 결과 */}
       <div>
         {results.length > 0 ? (
           <ul className="list-disc list-inside text-xl">
@@ -87,7 +89,6 @@ export default function AISearchPage() {
         )}
       </div>
 
-      {/* 검색 기록 */}
       <div className="mt-6">
         <h2 className="text-2xl font-bold mb-2">검색 기록</h2>
         {history.length > 0 ? (
