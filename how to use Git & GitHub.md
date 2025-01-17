@@ -28,7 +28,7 @@
 ## 2. Git 초기 설정
 1. 사용자 이름과 이메일 설정:
    ```bash
-   // GitHub의 Profile을 참고하세요. 사용자 이름과, GitHub 계정 이메일입니다.
+   # GitHub의 Profile을 참고하세요. 사용자 이름과, GitHub 계정 이메일입니다.
    git config --global user.name "사용자이름"
    git config --global user.email "사용자이메일"
    ```
@@ -55,18 +55,18 @@
    ```
 
 ### 3.2. 변경사항 확인 & 변경사항 업로드 (매번 작업시 수행)
+#### 주의! 이 섹션은 Git의 기본 사용법을 설명합니다. main 브랜치만 있는 상태를 전제하므로, 실제 작업시에는 [항목 6]을 참고하십시오!
 1. 작업 전 최신 상태로 업데이트:
-   ```bash
-   /* 선택: git fetch  <-- Repository의 변경사항만을 가져옵니다. 
+   ``` bash
+   # 선택: git fetch  <-- Repository의 변경사항만을 가져옵니다. 
    
-   fetch를 수행하지 않으면, GitHub의 변경사항을 git status 명령이 확인할 수 없습니다.
-   git status 명령은 항상 로컬 git을 기준으로 동작하기 때문이지요. 
-   현재 Repository가 로컬 Git과 얼마나 차이가 나는지를 확인하고 싶다면, 
-   git fetch 명령을 수행하고, git status 명령을 수행하십시오.
+   # fetch를 수행하지 않으면, GitHub의 변경사항을 git status 명령이 확인할 수 없습니다.
+   # git status 명령은 항상 로컬 git을 기준으로 동작하기 때문이지요. 
+   # 현재 Repository가 로컬 Git과 얼마나 차이가 나는지를 확인하고 싶다면, 
+   # git fetch 명령을 수행하고, git status 명령을 수행하십시오.
 
-   git fetch 와 git status를 수행한 결과, 변경된 사항이 없다면 pull을 할 필요가 없습니다.
-   하지만 확인 없이 항상 pull을 수행해도 좋습니다. 취향것 하십시오!
-   */
+   # git fetch 와 git status를 수행한 결과, 변경된 사항이 없다면 pull을 할 필요가 없습니다.
+   # 하지만 확인 없이 항상 pull을 수행해도 좋습니다. 취향것 하십시오!
 
    git pull
    ```
@@ -85,7 +85,7 @@
    ```
 5. 삭제된 파일도 반영하려면 (생성 수정 삭제 모두 반영):
     ```bash
-    // git add 이후, git status의 결과에 붉은 글씨가 남아있다면 수행하십시오.
+    # git add 이후, git status의 결과에 붉은 글씨가 남아있다면 수행하십시오.
     git add -u .
     ```
 6. 변경사항 커밋 (설명을 충실히, 그러나 너무 길지 않게 작성해 주세요):
@@ -123,7 +123,7 @@
    ```bash
    git add src/example.py
    git commit -m "example.py 수정"
-   git push origin main
+   git push origin siheon_v5
    ```
 
 ### 3.4. 충돌 해결
@@ -141,7 +141,7 @@
    git push
    ```
 
-## 4. 기타 유용한 명령어
+## 4. 브랜치 관련 명령어
 1. 현재 작업 브랜치 확인:
    ```bash
    git branch
@@ -173,34 +173,44 @@
    - 작업을 완료하고 자신의 브랜치로 push 합시다.
    - 큰 단위의 작업이 완료되었다면, main 브랜치로 pull request를 남겨주세요.
 
-## 6. 핵심 요약
+## 6. Branch를 사용한 실제 작업 과정
 - 최초 작업 과정 (repository clone: 모든 브랜치를 가져온다.)
-   ```sh
+   ``` bash
    git clone https://github.com/lamaBread/LogAnalyzer.git
    cd LogAnalyzer
+
+   git checkout -b <생성할 브랜치 이름>  # 브랜치를 생성하고, 즉시 이동합니다.
    ```
 
 - Docker 환경 구축 이후 작업 과정
-   ```sh
-   git checkout <자신의 브랜치 이름>  // 자신의 브랜치로 이동.
+   ``` bash
+   git checkout <자신의 브랜치 이름>  # 자신의 브랜치로 이동.
 
-   git branch  // 자신의 브랜치로 이동되었는지 확인하세요..
+   git branch  # 자신의 브랜치로 이동되었는지 확인하세요..
 
-   git pull //최신 자료 다운로드 (새롭게 clone 해도 된다.)
+   git pull origin main # main 브랜치의 최신 자료 다운로드. (정확히는 main의 commit들을 현재 브랜치에 merge 하는 것입니다.)
+   # 만일 main의 commit과 당신의 현재 branch가 동일한 파일을 수정했다면, 어떤 파일을 유지할지 선택해야 합니다.
 
-   docker compose up -d  //-d 옵션은 백그라운드 실행입니다.
+   docker compose up -d  # -d 옵션은 백그라운드 실행입니다.
 
-   //작업 시작 및 종료.
+   # 작업 시작 및 종료.
 
-   git add .  //생성 및 변경사항 반영
+   docker compose down  # docker 컨테이너들을 종료합니다.
 
-   git status  // 이 명령 실행 결과 모두 녹색이 되었는지 확인하세요. 
-   // 붉은 글씨로 삭제 사항을 반영하라고 띄워주는 경우
-   // => 'git add -u .' 명령으로 삭제사항을 반영하세요.
+   git add .  #생성 및 변경사항을 반영합니다. (최상위 작업 경로에서 하십시오!)
 
-   git commit -m "작업내용 설명"  // 반영한 내용을 로컬 git에 저장합니다.
+   git status  # 이 명령 실행 결과 모두 녹색이 되었는지 확인하세요. 
+   # 붉은 글씨로 삭제 사항을 반영하라고 띄워주는 경우,
+   # => 'git add -u .' 명령으로 삭제사항을 반영하세요.
 
-   git push  // commit을 GitHub에 업로드 합니다.
+   git commit -m "작업내용 설명"  # 반영한 내용을 로컬 git에 저장합니다.
+
+   git push origin <자신의 브랜치 이름>  # commit을 GitHub에 업로드 합니다. (자신의 브랜치로.)
+
+   # 큰 단위의 작업이 완료되면, 자신의 브랜치를 main으로 병합하도록 요청하세요.
+   # => GitHub 웹페이지에서 Pull Request 작성!
    ```
 
-이 문서를 따라 Git을 설치하고 사용할 수 있습니다. 문제가 발생하면 관리자나 Git 공식 문서를 참고하세요.
+- 이 문서를 따라 Git을 설치하고 사용할 수 있습니다.
+- 문제가 발생하면 먼저 Git 공식 문서를 참고하세요.
+- 문제가 해결되지 않는다면 관리자에게 도움을 요청하세요! 본인은 잘때 항상 수면모드를 사용하므로, 아무때나 연락을 남겨도 괜찮습니다.
