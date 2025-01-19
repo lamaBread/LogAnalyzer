@@ -1,0 +1,51 @@
+[Sun Jan 19 00:00:01.916183 2025] [mpm_prefork:notice] [pid 1194] AH00163: Apache/2.4.58 (Ubuntu) OpenSSL/3.0.13 configured -- resuming normal operations
+[Sun Jan 19 00:00:01.916193 2025] [core:notice] [pid 1194] AH00094: Command line: '/usr/sbin/apache2'
+[Sun Jan 19 00:30:26.242360 2025] [authz_core:error] [pid 264457] [client 94.102.49.155:60145] AH01630: client denied by server configuration: /var/www/html/server-status
+[Sun Jan 19 00:30:36.484868 2025] [authz_core:error] [pid 264458] [client 94.102.49.155:61857] AH01630: client denied by server configuration: /var/www/html/server-status
+[Sun Jan 19 06:43:54.833221 2025] [mpm_prefork:notice] [pid 1194] AH00171: Graceful restart requested, doing restart
+[Sun Jan 19 06:43:54.851029 2025] [mpm_prefork:notice] [pid 1194] AH00163: Apache/2.4.58 (Ubuntu) OpenSSL/3.0.13 configured -- resuming normal operations
+[Sun Jan 19 06:43:54.851041 2025] [core:notice] [pid 1194] AH00094: Command line: '/usr/sbin/apache2'
+[Sun Jan 19 06:44:05.086924 2025] [mpm_prefork:notice] [pid 1194] AH00171: Graceful restart requested, doing restart
+[Sun Jan 19 06:44:05.104854 2025] [mpm_prefork:notice] [pid 1194] AH00163: Apache/2.4.58 (Ubuntu) OpenSSL/3.0.13 configured -- resuming normal operations
+[Sun Jan 19 06:44:05.104866 2025] [core:notice] [pid 1194] AH00094: Command line: '/usr/sbin/apache2'
+[Sun Jan 19 06:44:07.722740 2025] [mpm_prefork:notice] [pid 1194] AH00171: Graceful restart requested, doing restart
+[Sun Jan 19 06:44:07.739374 2025] [mpm_prefork:notice] [pid 1194] AH00163: Apache/2.4.58 (Ubuntu) OpenSSL/3.0.13 configured -- resuming normal operations
+[Sun Jan 19 06:44:07.739382 2025] [core:notice] [pid 1194] AH00094: Command line: '/usr/sbin/apache2'
+[Sun Jan 19 06:45:27.565069 2025] [authz_core:error] [pid 266722] [client 207.154.197.113:35700] AH01630: client denied by server configuration: /var/www/html/server-status
+[Sun Jan 19 06:45:35.577994 2025] [php:error] [pid 266720] [client 207.154.197.113:35764] script '/var/www/html/info.php' not found or unable to stat
+[Sun Jan 19 07:41:31.976784 2025] [php:error] [pid 266722] [client 139.59.43.158:52108] script '/var/www/html/form.html' not found or unable to stat
+[Sun Jan 19 07:41:32.467489 2025] [php:error] [pid 266720] [client 139.59.43.158:52118] script '/var/www/html/upl.php' not found or unable to stat
+[Sun Jan 19 07:41:34.438097 2025] [php:error] [pid 266712] [client 139.59.43.158:52152] script '/var/www/html/1.php' not found or unable to stat
+[Sun Jan 19 07:41:35.411371 2025] [php:error] [pid 266723] [client 139.59.43.158:52168] script '/var/www/html/password.php' not found or unable to stat
+[Sun Jan 19 10:37:43.535980 2025] [authz_core:error] [pid 266710] [client 172.105.216.226:44320] AH01630: client denied by server configuration: /var/www/html/server-status
+[Sun Jan 19 10:37:43.930775 2025] [authz_core:error] [pid 266710] [client 172.105.216.226:47850] AH01630: client denied by server configuration: /var/www/html/server-status
+[Sun Jan 19 10:37:45.482803 2025] [php:error] [pid 266712] [client 172.105.216.226:48066] script '/var/www/html/admin.php' not found or unable to stat
+[Sun Jan 19 10:37:45.574164 2025] [php:error] [pid 266722] [client 172.105.216.226:44730] script '/var/www/html/admin.php' not found or unable to stat
+[Sun Jan 19 10:37:47.434764 2025] [php:error] [pid 267537] [client 172.105.216.226:52528] script '/var/www/html/main.php' not found or unable to stat
+[Sun Jan 19 10:37:47.585388 2025] [php:error] [pid 266710] [client 172.105.216.226:52534] script '/var/www/html/localstart.php' not found or unable to stat
+[Sun Jan 19 10:37:47.845090 2025] [php:error] [pid 266712] [client 172.105.216.226:52548] script '/var/www/html/login.html' not found or unable to stat
+[Sun Jan 19 10:37:47.960905 2025] [php:error] [pid 266709] [client 172.105.216.226:46034] script '/var/www/html/main.php' not found or unable to stat
+[Sun Jan 19 10:37:48.164053 2025] [php:error] [pid 266722] [client 172.105.216.226:46054] script '/var/www/html/localstart.php' not found or unable to stat
+[Sun Jan 19 10:37:48.921456 2025] [php:error] [pid 266712] [client 172.105.216.226:46132] script '/var/www/html/login.html' not found or unable to stat
+[Sun Jan 19 10:37:49.283183 2025] [php:error] [pid 266722] [client 172.105.216.226:52640] script '/var/www/html/inicio.html' not found or unable to stat
+[Sun Jan 19 10:37:50.203253 2025] [php:error] [pid 266711] [client 172.105.216.226:52720] script '/var/www/html/menu.php' not found or unable to stat
+[Sun Jan 19 10:37:50.408561 2025] [php:error] [pid 266720] [client 172.105.216.226:46212] script '/var/www/html/inicio.html' not found or unable to stat
+[Sun Jan 19 10:37:50.505635 2025] [php:error] [pid 267537] [client 172.105.216.226:52728] script '/var/www/html/base.php' not found or unable to stat
+[Sun Jan 19 10:37:50.965406 2025] [php:error] [pid 266711] [client 172.105.216.226:52752] script '/var/www/html/admin.html' not found or unable to stat
+[Sun Jan 19 10:37:51.639401 2025] [php:error] [pid 266708] [client 172.105.216.226:46264] script '/var/www/html/menu.php' not found or unable to stat
+[Sun Jan 19 10:37:52.038404 2025] [php:error] [pid 266720] [client 172.105.216.226:46290] script '/var/www/html/base.php' not found or unable to stat
+[Sun Jan 19 10:37:52.659438 2025] [php:error] [pid 266710] [client 172.105.216.226:46322] script '/var/www/html/admin.html' not found or unable to stat
+[Sun Jan 19 10:37:52.801975 2025] [php:error] [pid 267537] [client 172.105.216.226:52844] script '/var/www/html/start.php' not found or unable to stat
+[Sun Jan 19 10:37:53.721680 2025] [php:error] [pid 266721] [client 172.105.216.226:52892] script '/var/www/html/indice.php' not found or unable to stat
+[Sun Jan 19 10:37:54.796040 2025] [php:error] [pid 266722] [client 172.105.216.226:52978] script '/var/www/html/index.html' not found or unable to stat
+[Sun Jan 19 10:37:55.699184 2025] [php:error] [pid 266720] [client 172.105.216.226:53030] script '/var/www/html/home.php' not found or unable to stat
+[Sun Jan 19 10:37:55.851775 2025] [php:error] [pid 266721] [client 172.105.216.226:42396] script '/var/www/html/default.html' not found or unable to stat
+[Sun Jan 19 10:37:57.050013 2025] [php:error] [pid 266721] [client 172.105.216.226:42470] script '/var/www/html/inicio.php' not found or unable to stat
+[Sun Jan 19 10:37:57.202785 2025] [php:error] [pid 266722] [client 172.105.216.226:42480] script '/var/www/html/base.html' not found or unable to stat
+[Sun Jan 19 10:37:58.103590 2025] [php:error] [pid 266720] [client 172.105.216.226:42538] script '/var/www/html/menu.html' not found or unable to stat
+[Sun Jan 19 10:37:58.410087 2025] [php:error] [pid 266722] [client 172.105.216.226:42566] script '/var/www/html/main.html' not found or unable to stat
+[Sun Jan 19 10:37:59.744753 2025] [php:error] [pid 266708] [client 172.105.216.226:42654] script '/var/www/html/localstart.html' not found or unable to stat
+[Sun Jan 19 10:37:59.817156 2025] [php:error] [pid 266711] [client 172.105.216.226:42660] script '/var/www/html/home.html' not found or unable to stat
+[Sun Jan 19 10:38:00.119937 2025] [php:error] [pid 266720] [client 172.105.216.226:42682] script '/var/www/html/indice.html' not found or unable to stat
+[Sun Jan 19 10:38:00.191773 2025] [php:error] [pid 266721] [client 172.105.216.226:42692] script '/var/www/html/default.php' not found or unable to stat
+[Sun Jan 19 10:38:00.798981 2025] [php:error] [pid 266709] [client 172.105.216.226:42772] script '/var/www/html/start.html' not found or unable to stat
