@@ -200,6 +200,8 @@
          git checkout -b <생성할 브랜치 이름>  # 브랜치를 생성하고, 즉시 이동합니다.
          git checkout <자신의 브랜치 이름>  # 자신의 브랜치로 이동.
 
+   git branch  # 자신의 브랜치로 이동되었는지 한번 더 확인합시다.
+
    git pull origin main # main 브랜치의 최신 자료 다운로드. (정확히는 main의 commit들을 현재 브랜치에 merge 하는 것입니다.)
    # 만일 main의 commit과 당신의 현재 branch가 동일한 파일을 수정했다면, 어떤 파일을 유지할지 선택해야 합니다.
 
