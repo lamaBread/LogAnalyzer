@@ -1,6 +1,6 @@
 <?php
 
-die();
+// die();
 
 // 모든 로그를 읽어들여서 배열로 반환하는 함수.
 // 하나의 행을 하나의 원소로 삼아서 1차원 배열로 반환.
@@ -82,6 +82,7 @@ function analyze_for_mainPage($logArray) {
     }
 }
 
+/*
 // test code
 $logFilePath = '../LOG/combine_error.log';   
 $logArray = readLogFileToArray($logFilePath);
@@ -98,5 +99,4 @@ $securityReport = analyze_for_mainPage($logArray);
 echo '<pre>';
 echo $securityReport;
 echo '</pre>';
-
-
+*/
