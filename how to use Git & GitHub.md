@@ -184,7 +184,7 @@
    - 작업을 완료하고 자신의 브랜치로 push 합시다. (GitHub에 브랜치 업로드.)
    - 큰 단위의 작업이 완료되었다면, main 브랜치로 pull request를 남겨주세요.
 
-## 6. Branch를 사용한 실제 작업 과정
+## 7. Branch를 사용한 실제 작업 과정
 - 최초 작업 과정 (repository clone: 모든 브랜치를 가져온다.)
    ``` bash
    git clone https://github.com/lamaBread/LogAnalyzer.git
