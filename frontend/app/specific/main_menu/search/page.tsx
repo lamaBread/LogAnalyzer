@@ -1,47 +1,50 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState<string>(""); // 검색어 상태
-  const [results, setResults] = useState<string[]>([]); // 로컬 검색 결과 상태
+  const [results, setResults] = useState<string[]>([]); // 검색 결과 상태
   const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
   const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
   const [history, setHistory] = useState<string[]>([]); // 검색 기록 상태
-  const [localData, setLocalData] = useState<string[]>([]); // PHP 파일에서 불러온 데이터 상태
 
-  useEffect(() => {
-    // PHP 서버에서 로그 데이터를 가져오는 API 호출
-    fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php")  // 실제 PHP 파일 경로를 입력하세요
-      .then((response) => response.json())
-      .then((data) => setLocalData(data)) // PHP에서 받은 로그 데이터를 상태에 저장
-      .catch((error) => {
-        console.error("PHP 데이터를 읽는 중 오류 발생", error);
-        setError("PHP 파일을 불러오는 중 오류가 발생했습니다.");
-      });
-  }, []);
-
-  const handleSearch = () => {
-    if (!query.trim()) return;
+  const handleSearch = async () => {
+    if (!query.trim() || query.length < 1) {
+      setError("검색어를 입력하세요.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
-      // PHP에서 불러온 데이터에서 검색
-      const filteredResults = localData.filter((entry) =>
-        entry.toLowerCase().includes(query.toLowerCase()) // 검색어가 포함된 항목 필터링
-      );
+      // PHP 서버에 POST 요청 보내기
+      const response = await fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded", // PHP와 호환되는 방식
+          "X-Auth-Key": "A?5Ql1qpU9MQA?r", 
+        },
+        body: `question=${encodeURIComponent(query)}`, // 검색어를 전달
+      });
 
-      if (filteredResults.length > 0) {
-        setResults(filteredResults);
-      } else {
-        setResults(["검색 결과가 없습니다."]);
+      // 서버 응답 상태 체크
+      if (!response.ok) {
+        throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
       }
 
-      setHistory((prev) => [...prev, query]);
-    } catch (error) {
-      setError("검색 중 오류가 발생했습니다.");
+      const data = await response.json(); // PHP에서 반환된 JSON 데이터 받기
+      setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]); // 결과가 없으면 메시지 표시
+
+      // 검색 기록에 검색어 추가 (중복 방지, 최대 10개)
+      setHistory((prevHistory) => {
+        const newHistory = [query, ...prevHistory.filter((item) => item !== query)];
+        return newHistory.slice(0, 10); // 최대 10개로 제한
+      });
+    } catch (err) {
+      console.error("검색 중 오류 발생:", err); // 에러 로그 추가
+      setError(`검색 중 문제가 발생했습니다: ${err instanceof Error ? err.message : '알 수 없는 오류'}`); // 구체적인 에러 메시지 표시
     } finally {
       setLoading(false);
     }
@@ -51,6 +54,10 @@ export default function SearchPage() {
     if (e.key === "Enter") {
       handleSearch();
     }
+  };
+
+  const handleDeleteHistory = (searchTerm: string) => {
+    setHistory(history.filter((item) => item !== searchTerm)); // 선택한 검색어 삭제
   };
 
   return (
@@ -64,7 +71,7 @@ export default function SearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-grow p-4 border-2 rounded-md mr-4 text-xl"
+          className="flex-grow p-4 border-2 rounded-md mr-4 text-xl border-gray-300 dark:border-gray-700 text-black bg-white dark:bg-gray-800 dark:text-gray-200"
         />
         <button
           onClick={handleSearch}
@@ -94,7 +101,15 @@ export default function SearchPage() {
         {history.length > 0 ? (
           <ul className="list-disc list-inside text-lg">
             {history.map((item, index) => (
-              <li key={index}>{item}</li>
+              <li key={index} className="flex items-center">
+                <span>{item}</span>
+                <button
+                  onClick={() => handleDeleteHistory(item)}
+                  className="ml-2 text-red-500 hover:text-red-700"
+                >
+                  X
+                </button>
+              </li>
             ))}
           </ul>
         ) : (
