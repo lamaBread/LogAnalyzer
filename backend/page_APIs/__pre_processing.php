@@ -142,9 +142,8 @@ echo $securityReport;
 echo '</pre>';
 */
 
+/*
 // 상태코드별 로그 그룹화 테스트 코드
-
-
 $logFilePath = '../LOG/test_log_access';
 $logArray = readLogFileToArray($logFilePath);
 $groupedLogsByStatus = groupLogsByStatusCode($logArray);
@@ -158,3 +157,5 @@ $groupedLogsByStatusRange = groupLogsByStatusCodeRange($logArray);
 echo '<pre>';
 print_r($groupedLogsByStatusRange);
 echo '</pre>';
+
+*/
