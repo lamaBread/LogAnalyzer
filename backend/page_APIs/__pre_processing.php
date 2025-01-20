@@ -45,6 +45,47 @@ function groupLogsByIP($logArray) {
     return $groupedLogs;
 }
 
+// 로그 배열을 상태코드별로 그룹화하는 함수.
+// 상태코드를 추출하여 그룹화하고, 상태코드가 없는 경우 'unknown'으로 처리.
+// Key: 상태코드 / value: 해당 상태코드를 가지는 로그 배열.
+function groupLogsByStatusCode($logArray) {
+    $groupedLogs = [];
+    foreach ($logArray as $log) {
+        // Extract the status code from the log line
+        if (preg_match('/" [0-9]{3} /', $log, $matches)) {
+            $statusCode = trim($matches[0], '" ');
+        } else {
+            $statusCode = 'unknown';
+        }
+        if (!isset($groupedLogs[$statusCode])) {
+            $groupedLogs[$statusCode] = [];
+        }
+        $groupedLogs[$statusCode][] = $log;
+    }
+    return $groupedLogs;
+}
+
+// 로그 배열을 100 단위의 상태코드로 그룹화하는 함수.
+// 상태코드를 추출하여 100 단위로 그룹화하고, 상태코드가 없는 경우 'unknown'으로 처리.
+// Key: 100 단위 상태코드 / value: 해당 상태코드를 가지는 로그 배열.
+function groupLogsByStatusCodeRange($logArray) {
+    $groupedLogs = [];
+    foreach ($logArray as $log) {
+        // Extract the status code from the log line
+        if (preg_match('/" ([0-9]{3}) /', $log, $matches)) {
+            $statusCode = (int)$matches[1];
+            $statusCodeRange = floor($statusCode / 100) * 100;
+        } else {
+            $statusCodeRange = 'unknown';
+        }
+        if (!isset($groupedLogs[$statusCodeRange])) {
+            $groupedLogs[$statusCodeRange] = [];
+        }
+        $groupedLogs[$statusCodeRange][] = $log;
+    }
+    return $groupedLogs;
+}
+
 function analyze_for_mainPage($logArray) {
     $data_out = array(
         "model" => "llama3.2-vision",
@@ -100,3 +141,20 @@ echo '<pre>';
 echo $securityReport;
 echo '</pre>';
 */
+
+// 상태코드별 로그 그룹화 테스트 코드
+
+
+$logFilePath = '../LOG/test_log_access';
+$logArray = readLogFileToArray($logFilePath);
+$groupedLogsByStatus = groupLogsByStatusCode($logArray);
+echo '<pre>';
+print_r($groupedLogsByStatus);
+echo '</pre>';
+
+echo '<br><br><br>';
+// 100 단위 상태코드별 로그 그룹화 테스트 코드
+$groupedLogsByStatusRange = groupLogsByStatusCodeRange($logArray);
+echo '<pre>';
+print_r($groupedLogsByStatusRange);
+echo '</pre>';
