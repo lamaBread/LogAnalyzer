@@ -25,7 +25,9 @@ export default function Page() {
 
    // variable2에 따른 아이콘 결정
    const getIcon = (status: string | null) => {
-    if (status === "1") {
+    if (status === "0") {
+      return "no result"; // 결과 없음
+    } else if (status === "1") {
       return "☀️"; // 맑음
     } else if (status === "2") {
       return "🌥️"; // 흐림
@@ -58,7 +60,7 @@ export default function Page() {
             <>
               {/* dangerouslySetInnerHTML 사용하여 HTML 렌더링 */}
               <div dangerouslySetInnerHTML={{ __html: variable1 }} />
-              <p>Status Value: {variable2}</p>
+              {/* <p>Status Value: {variable2}</p> */}
             </>
           )}
         </div>
