@@ -86,7 +86,7 @@ function groupLogsByStatusCodeRange($logArray) {
     return $groupedLogs;
 }
 
-// 보고서를 HTML로 변환하는 함수. 문자열을 반환한다.
+// 보고서를 평가하여 1~3의 위험도 숫자를 출력하는 함수. 문자열(1~3)을 반환한다.
 // 미완성.
 function queryLLM_evaluateReport($mainText) {
     $promptText = "Based on the following report, please evaluate the server status as an integer from 1 (safe) to 3 (dangerous). Respond using JSON. " . $mainText;
@@ -129,7 +129,7 @@ function queryLLM_evaluateReport($mainText) {
     return null;
 }
 
-// 스트리밍 없이 LLM에 쿼리를 보내는 함수. 응답 JSON을 decode하여 반환한다. (반환: 연관배열)
+// LLM에 쿼리를 보내는 함수. 응답 JSON을 decode하여 반환한다. (반환: 연관배열)
 function queryLLM($prompt, $stream = false, $model = 'llama3.2') {
     $url = "http://ollama:11434/api/generate";
     $payload = [
