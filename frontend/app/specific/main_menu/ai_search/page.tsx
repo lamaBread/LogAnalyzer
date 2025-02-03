@@ -43,10 +43,6 @@ export default function AISearchPage() {
         setError("서버 응답 오류");
       }
 
-      // PHP 응답 데이터 처리 (JSON으로 변환)
-      const phpData = await response.json();
-      console.log("📌 PHP 응답 데이터:", phpData);
-
       // 2️⃣ AI 검색 요청 (AI API 호출)
       const aiResponse = await fetch("/api/aisearch", {
         method: "POST",
@@ -81,7 +77,7 @@ export default function AISearchPage() {
         return newHistory;
       });
 
-      setQuery("");
+      setQuery(""); // 검색 후 query를 초기화
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류 발생");
@@ -125,38 +121,30 @@ export default function AISearchPage() {
           <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
             {results || history.length > 0 ? (
               <div className="flex flex-col space-y-4">
-                {history.map((item, index) => (
+                {[...history, { question: query, answer: results }].map((item, index) => (
                   <div key={index} className="flex flex-col space-y-2">
                     {/* 사용자 질문을 오른쪽에 배치 */}
                     <div className="flex justify-end">
-                      <div className="bg-blue-500 text-black p-3 rounded-lg max-w-xs mb-2">
+                      <div
+                        className={`p-3 rounded-lg max-w-xs mb-2 ${
+                          item.question === query ? 'bg-gray-300 text-white' : 'bg-blue-500 text-black'
+                        }`}
+                      >
                         <span className="font-semibold">Q: </span>{item.question}
                       </div>
                     </div>
                     {/* AI 답변을 왼쪽에 배치 */}
                     <div className="flex justify-start">
-                      <div className="bg-gray-200 text-black p-3 rounded-lg max-w-xs">
+                      <div
+                        className={`p-3 rounded-lg max-w-xs ${
+                          item.answer === results ? 'bg-gray-100 text-black' : 'bg-gray-200 text-black'
+                        }`}
+                      >
                         <span className="font-semibold">A: </span>{item.answer}
                       </div>
                     </div>
                   </div>
                 ))}
-                {results && (
-                  <div className="flex flex-col space-y-2">
-                    {/* 사용자 질문을 오른쪽에 배치 */}
-                    <div className="flex justify-end">
-                      <div className="bg-gray-300 text-white p-3 rounded-lg max-w-xs mb-2">
-                        <span className="font-semibold">Q: </span>{query}
-                      </div>
-                    </div>
-                    {/* AI 답변을 왼쪽에 배치 */}
-                    <div className="flex justify-start">
-                      <div className="bg-gray-100 text-black p-3 rounded-lg max-w-xs">
-                        <span className="font-semibold">A: </span>{results}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <p className="p-4">검색 결과가 없습니다.</p>
