@@ -17,7 +17,7 @@ try {
         exit();
     }
 
-    $result_html = md(nl2br($output['response']));  
+    $result_html = nl2br($output['response']);  
 
     $statusValue = 0;  // 0: 보고서 미평가, 1: 안전, 2: 주의, 3: 위험
 
