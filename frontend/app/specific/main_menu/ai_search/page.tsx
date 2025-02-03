@@ -71,15 +71,17 @@ export default function AISearchPage() {
       console.log("📌 AI 응답 데이터:", aiData);
 
       // 3️⃣ 결과 저장 (PHP 응답 + AI 응답)
-      const combinedResult = `🔹 PHP: ${phpData || "없음"} | 🤖 AI: ${aiData.answer}`;
-      setResults(combinedResult); // 검색 결과 반영
+      const combinedResult = { question: query, answer: aiData.answer };
+      setResults(aiData.answer); // AI 답변 반영
 
       // 4️⃣ 새로운 질문과 답변을 history에 추가
       setHistory((prev) => {
-        const newHistory = [...prev, { question: query, answer: combinedResult }];
+        const newHistory = [...prev, { question: query, answer: aiData.answer }];
         console.log("새로운 history:", newHistory);  // 새로운 history 배열 확인
         return newHistory;
       });
+
+      setQuery("");
 
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류 발생");
@@ -105,9 +107,9 @@ export default function AISearchPage() {
             {history.length > 0 ? (
               <ul className="text-lg">
                 {history.map((item, index) => (
-                  <li key={index} className="flex justify-between items-center border-b py-2">
-                    <span>{item.question}</span>
-                    <span>{item.answer}</span>
+                  <li key={index} className="flex flex-col space-y-2 border-b py-2">
+                    <div className="text-blue-500 font-semibold">Q: {item.question}</div>
+                    <div className="text-gray-800 dark:text-gray-300">A: {item.answer}</div>
                   </li>
                 ))}
               </ul>
@@ -121,14 +123,41 @@ export default function AISearchPage() {
         <div className="w-3/4 p-2">
           <h2 className="text-2xl font-bold mb-2">AI 챗봇</h2>
           <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
-            {results ? (
-              <table className="table-auto w-full border-collapse text-xl">
-                <tbody>
-                  <tr className="bg-white dark:bg-gray-700">
-                    <td className="px-4 py-2 border-b border-gray-400">{results}</td>
-                  </tr>
-                </tbody>
-              </table>
+            {results || history.length > 0 ? (
+              <div className="flex flex-col space-y-4">
+                {history.map((item, index) => (
+                  <div key={index} className="flex flex-col space-y-2">
+                    {/* 사용자 질문을 오른쪽에 배치 */}
+                    <div className="flex justify-end">
+                      <div className="bg-blue-500 text-black p-3 rounded-lg max-w-xs mb-2">
+                        <span className="font-semibold">Q: </span>{item.question}
+                      </div>
+                    </div>
+                    {/* AI 답변을 왼쪽에 배치 */}
+                    <div className="flex justify-start">
+                      <div className="bg-gray-200 text-black p-3 rounded-lg max-w-xs">
+                        <span className="font-semibold">A: </span>{item.answer}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {results && (
+                  <div className="flex flex-col space-y-2">
+                    {/* 사용자 질문을 오른쪽에 배치 */}
+                    <div className="flex justify-end">
+                      <div className="bg-gray-300 text-white p-3 rounded-lg max-w-xs mb-2">
+                        <span className="font-semibold">Q: </span>{query}
+                      </div>
+                    </div>
+                    {/* AI 답변을 왼쪽에 배치 */}
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 text-black p-3 rounded-lg max-w-xs">
+                        <span className="font-semibold">A: </span>{results}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <p className="p-4">검색 결과가 없습니다.</p>
             )}
