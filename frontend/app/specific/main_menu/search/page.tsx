@@ -1,50 +1,55 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 export default function SearchPage() {
   const [query, setQuery] = useState<string>(""); // 검색어 상태
-  const [results, setResults] = useState<string[]>([]); // 로컬 검색 결과 상태
+  const [results, setResults] = useState<string[]>([]); // 검색 결과 상태
+  const [history, setHistory] = useState<string[]>([]); // 검색 기록 (최대 10개)
   const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
   const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
-  const [history, setHistory] = useState<string[]>([]); // 검색 기록 상태
-  const [localData, setLocalData] = useState<string[]>([]); // PHP 파일에서 불러온 데이터 상태
 
-  useEffect(() => {
-    // PHP 서버에서 로그 데이터를 가져오는 API 호출
-    fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php")  // 실제 PHP 파일 경로를 입력하세요
-      .then((response) => response.json())
-      .then((data) => setLocalData(data)) // PHP에서 받은 로그 데이터를 상태에 저장
-      .catch((error) => {
-        console.error("PHP 데이터를 읽는 중 오류 발생", error);
-        setError("PHP 파일을 불러오는 중 오류가 발생했습니다.");
-      });
-  }, []);
-
-  const handleSearch = () => {
-    if (!query.trim()) return;
+  const handleSearch = async () => {
+    if (!query.trim() || query.length < 1) {
+      setError("검색어를 입력하세요.");
+      return;
+    }
 
     setLoading(true);
     setError(null);
 
     try {
-      // PHP에서 불러온 데이터에서 검색
-      const filteredResults = localData.filter((entry) =>
-        entry.toLowerCase().includes(query.toLowerCase()) // 검색어가 포함된 항목 필터링
-      );
+      const response = await fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-Auth-Key": "A?5Ql1qpU9MQA?r",
+        },
+        body: `question=${encodeURIComponent(query)}`,
+      });
 
-      if (filteredResults.length > 0) {
-        setResults(filteredResults);
-      } else {
-        setResults(["검색 결과가 없습니다."]);
+      if (!response.ok) {
+        throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
       }
 
-      setHistory((prev) => [...prev, query]);
-    } catch (error) {
-      setError("검색 중 오류가 발생했습니다.");
+      const data = await response.json();
+      setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]);
+
+      // 검색 기록 추가 (최대 10개 유지)
+      setHistory((prev) => {
+        const updatedHistory = [query, ...prev.filter((item) => item !== query)].slice(0, 10);
+        return updatedHistory;
+      });
+    } catch (err) {
+      console.error("검색 중 오류 발생:", err);
+      setError(`검색 중 문제가 발생했습니다: ${err instanceof Error ? err.message : "알 수 없는 오류"}`);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteHistory = (index: number) => {
+    setHistory((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -64,7 +69,7 @@ export default function SearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
-          className="flex-grow p-4 border-2 rounded-md mr-4 text-xl"
+          className="flex-grow p-4 border-2 rounded-md mr-4 text-xl border-gray-300 dark:border-gray-700 text-black bg-white dark:bg-gray-800 dark:text-gray-200"
         />
         <button
           onClick={handleSearch}
@@ -77,30 +82,48 @@ export default function SearchPage() {
       {loading && <p>로딩 중...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      <div>
-        {results.length > 0 ? (
-          <ul className="list-disc list-inside text-xl">
-            {results.map((result, index) => (
-              <li key={index}>{result}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>검색 결과가 없습니다.</p>
-        )}
+      {/* 검색 결과 */}
+      <div className="mt-6">
+        <h2 className="text-2xl font-bold mb-2">검색 결과</h2>
+        <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
+          {results.length > 0 ? (
+            <table className="table-auto w-full border-collapse text-xl">
+              <tbody>
+                {results.map((result, index) => (
+                  <tr
+                    key={index}
+                    className={index % 2 === 0 ? "bg-white dark:bg-gray-700" : "bg-gray-200 dark:bg-gray-800"}
+                  >
+                    <td className="px-4 py-2 border-b border-gray-400">{result}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className="p-4">검색 결과가 없습니다.</p>
+          )}
+        </div>
       </div>
 
-      <div className="mt-6">
-        <h2 className="text-2xl font-bold mb-2">검색 기록</h2>
-        {history.length > 0 ? (
-          <ul className="list-disc list-inside text-lg">
+      {/* 검색 기록 */}
+      {history.length > 0 && (
+        <div className="mt-6">
+          <h2 className="text-2xl font-bold mb-2">검색 기록</h2>
+          <ul className="text-lg">
             {history.map((item, index) => (
-              <li key={index}>{item}</li>
+              <li key={index} className="flex justify-between items-center border-b py-2">
+                <span>{item}</span>
+                <button
+                  onClick={() => handleDeleteHistory(index)}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  삭제
+                </button>
+              </li>
             ))}
           </ul>
-        ) : (
-          <p>검색 기록이 없습니다.</p>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }
