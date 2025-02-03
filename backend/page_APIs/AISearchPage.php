@@ -21,4 +21,6 @@ $prompt = "Here is the log context:\n" . $logs_string . "\n\nQuestion: " . $ques
 $response = queryLLM($prompt);
 
 header('Content-Type: application/json');
-echo json_encode($response);
+echo json_encode(md(nl2br($response['response'])));  // HTML로 전환하여 출력.
+
+
