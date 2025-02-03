@@ -86,29 +86,6 @@ function groupLogsByStatusCodeRange($logArray) {
     return $groupedLogs;
 }
 
-// 로그 배열을 분석하여 보고서를 생성하는 함수. 문자열을 반환한다.
-function queryLLM($prompt, $stream = false, $model = 'llama3.2') {
-    $url = "http://ollama:11434/api/generate"; // Ollama 컨테이너의 API 엔드포인트
-
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['prompt' => $prompt, 'model' => $model, 'stream' => $stream]));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-
-    $response = curl_exec($ch);
-    $response = json_decode($response, true);  // JSON 형식의 응답을 배열로 변환 
-      
-    if (curl_errno($ch)) {
-        echo "Error querying LLM: " . curl_error($ch);
-        curl_close($ch);
-        return null;
-    }
-    curl_close($ch);
-
-    return $response;  // LLM의 응답 전체를 반환
-}
-
 // 보고서를 HTML로 변환하는 함수. 문자열을 반환한다.
 // 미완성.
 function queryLLM_evaluateReport($mainText) {
@@ -117,7 +94,7 @@ function queryLLM_evaluateReport($mainText) {
         'prompt' => $promptText,
         'model' => 'llama3.2',
         'stream' => false,
-        'format' => [
+        'format' => [ 
             'type' => 'object',
             'properties' => [
                 'level' => ['type' => 'integer']
@@ -151,6 +128,27 @@ function queryLLM_evaluateReport($mainText) {
     }
     return null;
 }
+
+// 스트리밍 없이 LLM에 쿼리를 보내는 함수. 응답 JSON을 decode하여 반환한다. (반환: 연관배열)
+function queryLLM($prompt, $stream = false, $model = 'llama3.2') {
+    $url = "http://ollama:11434/api/generate";
+    $payload = [
+        'model' => $model,
+        'prompt' => $prompt,
+        'stream' => $stream
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    $response = curl_exec($ch);
+    curl_close($ch);
+
+    return json_decode($response, true);
+}
+
 
 // markdown parser
 
