@@ -8,32 +8,32 @@ interface Context {
 }
 
 export default function AISearchPage() {
-  const [query, setQuery] = useState<string>(""); // 검색어 상태
-  const [results, setResults] = useState<string | null>(null); // AI 검색 결과 상태
-  const [history, setHistory] = useState<Context[]>([]); // 검색 기록 상태
-  const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
-  const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
-
+  const [results, setResults] = useState<string[]>([]); // 검색 결과를 저장
+  const [history, setHistory] = useState<{ question: string; answer: string }[]>([]); // 질문과 답변을 저장
+  const [query, setQuery] = useState<string>(""); // 검색어 상태 관리
+  const [error, setError] = useState<string | null>(null); // 에러 상태 관리
+  const [loading, setLoading] = useState<boolean>(false); // 로딩 상태 관리
+  
   const handleSearch = async () => {
     if (!query.trim()) {
       setError("검색어를 입력하세요.");
       return;
     }
-
+  
     setLoading(true); // 로딩 시작
     setError(null); // 에러 초기화
-
+  
     try {
-      // 1️⃣ PHP 서버에 POST 요청 보내기 (기존 searchLogs.php와 연결)
+      // 1️⃣ PHP 서버에 POST 요청 보내기
       const response = await fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "X-Auth-Key": "A?5Ql1qpU9MQA?r",
         },
-        body: `question=${encodeURIComponent(query)}`, // 템플릿 리터럴 수정
+        body: `question=${encodeURIComponent(query)}`, // 검색어 보내기
       });
-
+  
       const responseText = await response.text(); // 텍스트로 응답 받기
       try {
         const data = JSON.parse(responseText); // JSON 형식으로 변환
@@ -42,8 +42,8 @@ export default function AISearchPage() {
         console.error("응답을 JSON으로 파싱하는 중 오류 발생:", error);
         setError("서버 응답 오류");
       }
-
-      // 2️⃣ AI 검색 요청 (AI API 호출)
+  
+      // 2️⃣ AI 검색 요청
       const aiResponse = await fetch("/api/aisearch", {
         method: "POST",
         headers: {
@@ -51,47 +51,48 @@ export default function AISearchPage() {
         },
         body: JSON.stringify({
           question: query,
-          contexts: history.map((item) => ({
-            question: item.question,
-            answer: item.answer,
-          })),
+          contexts: history, // history 전체를 contexts로 전달
         }),
       });
-
+  
       if (!aiResponse.ok) {
         const errorData = await aiResponse.json();
         throw new Error(errorData.error || "AI 검색 요청 실패");
       }
-
+  
       const aiData = await aiResponse.json(); // AI 응답 데이터 처리
       console.log("📌 AI 응답 데이터:", aiData);
-
+  
       // 3️⃣ 결과 저장 (PHP 응답 + AI 응답)
-      const combinedResult = { question: query, answer: aiData.answer };
-      setResults(aiData.answer); // AI 답변 반영
-
+      setResults((prevResults) => [...prevResults, aiData.answer]); // AI 응답을 기존 결과에 추가
+  
       // 4️⃣ 새로운 질문과 답변을 history에 추가
       setHistory((prev) => {
         const newHistory = [...prev, { question: query, answer: aiData.answer }];
-        console.log("새로운 history:", newHistory);  // 새로운 history 배열 확인
         return newHistory;
       });
-
-      setQuery(""); // 검색 후 query를 초기화
-
+  
+      // 검색 완료 후 검색어 초기화
+      setQuery(""); // 검색어 비우기
+  
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류 발생");
     } finally {
       setLoading(false); // 로딩 완료
     }
   };
+  
+  
 
-  // 엔터 키를 눌렀을 때 검색 함수 실행
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      handleSearch();
-    }
-  };
+
+const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (e.key === "Enter") {
+    handleSearch();  // 검색을 진행
+    // 검색 후에는 setQuery("") 호출하여 입력창만 비움
+  }
+  
+};
+
 
   return (
     <div className="flex flex-col h-screen">
@@ -121,30 +122,38 @@ export default function AISearchPage() {
           <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
             {results || history.length > 0 ? (
               <div className="flex flex-col space-y-4">
-                {[...history, { question: query, answer: results }].map((item, index) => (
+                {history.map((item, index) => (
                   <div key={index} className="flex flex-col space-y-2">
                     {/* 사용자 질문을 오른쪽에 배치 */}
                     <div className="flex justify-end">
-                      <div
-                        className={`p-3 rounded-lg max-w-xs mb-2 ${
-                          item.question === query ? 'bg-gray-300 text-white' : 'bg-blue-500 text-black'
-                        }`}
-                      >
+                      <div className="bg-blue-500 text-black p-3 rounded-lg max-w-xs mb-2">
                         <span className="font-semibold">Q: </span>{item.question}
                       </div>
                     </div>
                     {/* AI 답변을 왼쪽에 배치 */}
                     <div className="flex justify-start">
-                      <div
-                        className={`p-3 rounded-lg max-w-xs ${
-                          item.answer === results ? 'bg-gray-100 text-black' : 'bg-gray-200 text-black'
-                        }`}
-                      >
+                      <div className="bg-gray-200 text-black p-3 rounded-lg max-w-xs">
                         <span className="font-semibold">A: </span>{item.answer}
                       </div>
                     </div>
                   </div>
                 ))}
+                {results && (
+                  <div className="flex flex-col space-y-2">
+                    {/* 사용자 질문을 오른쪽에 배치 */}
+                    <div className="flex justify-end">
+                      <div className="bg-gray-300 text-black p-3 rounded-lg max-w-xs mb-2">
+                        <span className="font-semibold">Q: </span>{query}
+                      </div>
+                    </div>
+                    {/* AI 답변을 왼쪽에 배치 */}
+                    <div className="flex justify-start">
+                      <div className="bg-gray-100 text-black p-3 rounded-lg max-w-xs">
+                        <span className="font-semibold">A: </span>{results}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <p className="p-4">검색 결과가 없습니다.</p>
