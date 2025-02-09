@@ -77,19 +77,24 @@ export default function AISearchPage() {
         {/* 검색 기록 */}
         <div className="w-1/4 p-4 border-r border-gray-300 dark:border-gray-700">
           <h2 className="text-2xl font-bold mb-4">검색 기록</h2>
-          <div className="p-4 min-h-[50px]">
-            {results.length > 0 ? (
-              <ul className="text-lg">
-                {results.map((item, index) => (
-                  <li key={index} className="flex flex-col space-y-2 border-b py-2">
-                    <div className="text-blue-500 font-semibold">Q: {item.question}</div>
-                    <div className="text-gray-800 dark:text-gray-300">A: {item.answer}</div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>검색 기록이 없습니다.</p>
-            )}
+          <div
+            className="overflow-y-auto"
+            style={{ maxHeight: "500px" }} // max-height 설정으로 스크롤 추가
+          >
+            <div className="p-4 min-h-[50px]">
+              {results.length > 0 ? (
+                <ul className="text-lg">
+                  {results.map((item, index) => (
+                    <li key={index} className="flex flex-col space-y-2 border-b py-2">
+                      <div className="text-blue-500 font-semibold">Q: {item.question}</div>
+                      <div className="text-gray-800 dark:text-gray-300">A: {item.answer}</div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>검색 기록이 없습니다.</p>
+              )}
+            </div>
           </div>
         </div>
 
