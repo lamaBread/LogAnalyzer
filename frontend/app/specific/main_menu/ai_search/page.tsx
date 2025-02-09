@@ -96,18 +96,21 @@ export default function AISearchPage() {
         {/* AI 챗봇 */}
         <div className="w-3/4 p-2">
           <h2 className="text-2xl font-bold mb-2">AI 챗봇</h2>
-          <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "700px" }}>
+          <div
+            className="overflow-y-auto border border-gray-400 rounded-md"
+            style={{ maxHeight: "500px" }} // max-height 설정으로 대화창 높이 제한
+          >
             {results.length > 0 ? (
               <div className="flex flex-col space-y-4">
                 {results.map((item, index) => (
                   <div key={index} className="flex flex-col space-y-2">
-                    {/* 사용자 질문을 오른쪽에 배치 */}
+                    {/* 사용자 질문 */}
                     <div className="flex justify-end">
                       <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs mb-2">
                         <span className="font-semibold">Q: </span>{item.question}
                       </div>
                     </div>
-                    {/* AI 답변을 왼쪽에 배치 */}
+                    {/* AI 답변 */}
                     <div className="flex justify-start">
                       <div className="bg-gray-200 text-black p-3 rounded-lg max-w-xs">
                         <span className="font-semibold">A: </span>{item.answer}
