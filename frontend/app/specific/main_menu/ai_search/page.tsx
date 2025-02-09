@@ -1,98 +1,99 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-interface Context {
+interface HistoryItem {
   question: string;
   answer: string;
 }
 
 export default function AISearchPage() {
-  const [results, setResults] = useState<string[]>([]); // 검색 결과를 저장
-  const [history, setHistory] = useState<{ question: string; answer: string }[]>([]); // 질문과 답변을 저장
+  const [results, setResults] = useState<HistoryItem[]>([]); // 검색 결과와 AI 답변을 저장
   const [query, setQuery] = useState<string>(""); // 검색어 상태 관리
   const [error, setError] = useState<string | null>(null); // 에러 상태 관리
   const [loading, setLoading] = useState<boolean>(false); // 로딩 상태 관리
-  
+
+  useEffect(() => {
+    // 컴포넌트 로드 시 DB에서 이전 대화 기록 불러오기
+    const fetchConversations = async () => {
+      try {
+        const response = await fetch('/api/getConversations');
+        const data = await response.json();
+        setResults(data);
+      } catch (err) {
+        setError("대화 기록을 불러오지 못했습니다.");
+      }
+    };
+
+    fetchConversations();
+  }, []);
+
   const handleSearch = async () => {
     if (!query.trim()) {
       setError("검색어를 입력하세요.");
       return;
     }
-  
-    setLoading(true); // 로딩 시작
-    setError(null); // 에러 초기화
-  
+
+    setLoading(true);
+    setError(null);
+
     try {
       // 1️⃣ PHP 서버에 POST 요청 보내기
-      const response = await fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php", {
+      const response = await fetch("http://localhost:8445/APIs/page_APIs/AISearchPage.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "X-Auth-Key": "A?5Ql1qpU9MQA?r",
         },
-        body: `question=${encodeURIComponent(query)}`, // 검색어 보내기
+        body: `question=${encodeURIComponent(query)}`,
       });
-  
-      const responseText = await response.text(); // 텍스트로 응답 받기
-      try {
-        const data = JSON.parse(responseText); // JSON 형식으로 변환
-        setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]);
-      } catch (error) {
-        console.error("응답을 JSON으로 파싱하는 중 오류 발생:", error);
-        setError("서버 응답 오류");
-      }
-  
+
+      const responseText = await response.text();
+      const data = JSON.parse(responseText);
+      const phpResults = data.length > 0 ? data : ["검색 결과가 없습니다."];
+
       // 2️⃣ AI 검색 요청
       const aiResponse = await fetch("/api/aisearch", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          question: query,
-          contexts: history, // history 전체를 contexts로 전달
-        }),
+        body: JSON.stringify({ question: query, contexts: results }), // results를 context로 사용
       });
-  
+
       if (!aiResponse.ok) {
         const errorData = await aiResponse.json();
         throw new Error(errorData.error || "AI 검색 요청 실패");
       }
-  
-      const aiData = await aiResponse.json(); // AI 응답 데이터 처리
-      console.log("📌 AI 응답 데이터:", aiData);
-  
-      // 3️⃣ 결과 저장 (PHP 응답 + AI 응답)
-      setResults((prevResults) => [...prevResults, aiData.answer]); // AI 응답을 기존 결과에 추가
-  
-      // 4️⃣ 새로운 질문과 답변을 history에 추가
-      setHistory((prev) => {
-        const newHistory = [...prev, { question: query, answer: aiData.answer }];
-        return newHistory;
+
+      const aiData = await aiResponse.json();
+
+      // 3️⃣ 결과 저장 (PHP 결과 + AI 응답)
+      const newHistory = [...results, { question: query, answer: aiData.answer || phpResults.join("\n") }];
+      setResults(newHistory);
+
+      // DB에 대화 기록 저장
+      await fetch("/api/saveConversation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ question: query, answer: aiData.answer || phpResults.join("\n") }),
       });
-  
-      // 검색 완료 후 검색어 초기화
-      setQuery(""); // 검색어 비우기
-  
+
+      setQuery(""); // 검색어 초기화
     } catch (err) {
       setError(err instanceof Error ? err.message : "알 수 없는 오류 발생");
     } finally {
-      setLoading(false); // 로딩 완료
+      setLoading(false);
     }
   };
-  
-  
 
-
-const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (e.key === "Enter") {
-    handleSearch();  // 검색을 진행
-    // 검색 후에는 setQuery("") 호출하여 입력창만 비움
-  }
-  
-};
-
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -101,9 +102,9 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         <div className="w-1/4 p-4 border-r border-gray-300 dark:border-gray-700">
           <h2 className="text-2xl font-bold mb-4">검색 기록</h2>
           <div className="p-4 min-h-[50px]">
-            {history.length > 0 ? (
+            {results.length > 0 ? (
               <ul className="text-lg">
-                {history.map((item, index) => (
+                {results.map((item, index) => (
                   <li key={index} className="flex flex-col space-y-2 border-b py-2">
                     <div className="text-blue-500 font-semibold">Q: {item.question}</div>
                     <div className="text-gray-800 dark:text-gray-300">A: {item.answer}</div>
@@ -119,14 +120,14 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         {/* AI 챗봇 */}
         <div className="w-3/4 p-2">
           <h2 className="text-2xl font-bold mb-2">AI 챗봇</h2>
-          <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
-            {results || history.length > 0 ? (
+          <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "700px" }}>
+            {results.length > 0 ? (
               <div className="flex flex-col space-y-4">
-                {history.map((item, index) => (
+                {results.map((item, index) => (
                   <div key={index} className="flex flex-col space-y-2">
                     {/* 사용자 질문을 오른쪽에 배치 */}
                     <div className="flex justify-end">
-                      <div className="bg-blue-500 text-black p-3 rounded-lg max-w-xs mb-2">
+                      <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs mb-2">
                         <span className="font-semibold">Q: </span>{item.question}
                       </div>
                     </div>
@@ -138,22 +139,6 @@ const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
                     </div>
                   </div>
                 ))}
-                {results && (
-                  <div className="flex flex-col space-y-2">
-                    {/* 사용자 질문을 오른쪽에 배치 */}
-                    <div className="flex justify-end">
-                      <div className="bg-gray-300 text-black p-3 rounded-lg max-w-xs mb-2">
-                        <span className="font-semibold">Q: </span>{query}
-                      </div>
-                    </div>
-                    {/* AI 답변을 왼쪽에 배치 */}
-                    <div className="flex justify-start">
-                      <div className="bg-gray-100 text-black p-3 rounded-lg max-w-xs">
-                        <span className="font-semibold">A: </span>{results}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <p className="p-4">검색 결과가 없습니다.</p>

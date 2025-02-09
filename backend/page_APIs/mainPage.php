@@ -1,13 +1,13 @@
 <?php
 
-// include_once '__authCode.php';  // POST 검증 & 인증코드 검증
+include_once '__authCode.php';  // POST 검증 & 인증코드 검증
 include_once '__pre_processing.php';  // readLogFileToArray, groupLogsByIP, groupLogsByStatusCode 함수 포함
 
 try {
     $logArray = readLogFileToArray('../LOG/test_log_access');  // 로그 파일을 배열로 읽어옴
     // print_r($logArray);
 
-    $prompt = "get logs and please make a security report within 300 characters. Logs:" . implode("\n", $logArray);
+    $prompt = "get logs and please make a security report within 300 words. Logs:" . implode("\n", $logArray);
     $output = queryLLM($prompt);
 
     if (!isset($output)) {
@@ -17,7 +17,7 @@ try {
         exit();
     }
 
-    $result_html = md($output['response']);  
+    $result_html = nl2br($output['response']);  
 
     $statusValue = 0;  // 0: 보고서 미평가, 1: 안전, 2: 주의, 3: 위험
 

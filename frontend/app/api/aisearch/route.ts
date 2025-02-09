@@ -1,45 +1,68 @@
-import { NextResponse } from "next/server";
-import pool from "@/app/lib/db"; // db.ts에서 default export한 pool을 가져옴
+import { NextApiRequest, NextApiResponse } from 'next';
+import pool from '@/app/lib/db'; // 이제 connection 대신 pool을 임포트합니다.
 
-export async function POST(request: Request) {
+// 대화 기록을 DB에 저장하는 함수
+const saveConversationToDB = async (question: string, answer: string, contexts: { question: string; answer: string }[]) => {
+  const connection = await pool.getConnection(); // 커넥션 풀에서 커넥션을 가져옵니다.
+
   try {
-    const { question, answer, contexts }: { question: string; answer: string; contexts: any[] } = await request.json();
+    await connection.beginTransaction(); // 트랜잭션 시작
 
-    // 1. 질문과 답변을 conversation 테이블에 저장
-    console.log("🔍 DB에 질문과 답변 저장 중...");
-
-    const [rows] = await pool.query(
-      `INSERT INTO conversation (question, answer) VALUES (?, ?)`,
+    // 1️⃣ 대화 기록을 `conversation` 테이블에 저장
+    const [conversationResult]: any = await connection.query(
+      'INSERT INTO conversation (question, answer) VALUES (?, ?)',
       [question, answer]
     );
 
-    // insertId는 rows 배열의 첫 번째 객체에 포함되어 있음
-    const conversationId = (rows as any).insertId;
-    console.log("✅ 대화 기록 삽입 완료. insertId:", conversationId);
-
-    // 2. contexts를 context 테이블에 저장
-    console.log("🔍 contexts 저장 중...");
-    for (const context of contexts) {
-      await pool.query(
-        `INSERT INTO context (conversation_id, context_question, context_answer) VALUES (?, ?, ?)`,
-        [conversationId, context.question, context.answer]
-      );
+    const conversationId = conversationResult?.insertId;
+    if (!conversationId) {
+      throw new Error('대화 기록 저장 실패: insertId가 없습니다.');
     }
-    console.log("✅ contexts 저장 완료.");
 
-    // 3. AI 응답을 반환 (예시로 처리한 부분)
-    const aiResponse = await getAIResponse(question, contexts); // 실제 AI 응답 처리 함수
-    console.log("📦 AI 응답 데이터:", aiResponse);
+    // 2️⃣ `contexts`가 있다면 `context` 테이블에 저장
+    if (contexts && contexts.length > 0) {
+      for (const context of contexts) {
+        await connection.query(
+          'INSERT INTO context (conversation_id, context_question, context_answer) VALUES (?, ?, ?)',
+          [conversationId, context.question, context.answer]
+        );
+      }
+    }
 
-    return NextResponse.json({ answer: aiResponse });
+    await connection.commit(); // 트랜잭션 커밋
+    return conversationId;
   } catch (error) {
-    console.error("🔥 오류 발생:", error); // 오류 로그 추가
-    return NextResponse.json({ error: "서버 오류가 발생했습니다." }, { status: 500 });
+    await connection.rollback(); // 오류 발생 시 트랜잭션 롤백
+    console.error('DB 저장 실패:', error);
+    throw new Error('DB 저장 실패');
+  } finally {
+    connection.release(); // 커넥션을 풀에 반환
   }
-}
+};
 
-// 예시: AI 응답을 얻는 함수 (실제 로직에 맞게 작성)
-async function getAIResponse(question: string, contexts: any[]): Promise<string> {
-  // 여기에 AI 응답을 얻는 로직을 넣으세요
-  return `AI가 생성한 답변: ${question}`; // 예시 응답
-}
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method === 'POST') {
+    const { question, contexts } = req.body;
+
+    if (!question || !contexts) {
+      return res.status(400).json({ error: '잘못된 입력입니다.' });
+    }
+
+    try {
+      // AI 응답을 생성 (여기서는 임시로 "AI의 답변" 사용)
+      const aiAnswer = `AI의 답변: ${question}`;
+
+      // DB에 대화 기록 저장
+      const conversationId = await saveConversationToDB(question, aiAnswer, contexts);
+
+      // 저장된 데이터를 포함한 응답을 클라이언트로 반환
+      res.status(200).json({ answer: aiAnswer, conversationId });
+    } catch (error) {
+      res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+    }
+  } else {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  }
+};
+
+export default handler;
