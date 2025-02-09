@@ -14,12 +14,15 @@ export default function AISearchPage() {
   const [loading, setLoading] = useState<boolean>(false); // 로딩 상태 관리
 
   useEffect(() => {
-    // 컴포넌트 로드 시 DB에서 이전 대화 기록 불러오기
+    // 컴포넌트 로드 시 더미 데이터 사용
     const fetchConversations = async () => {
       try {
-        const response = await fetch('/api/getConversations');
-        const data = await response.json();
-        setResults(data);
+        // 원래 DB에서 가져오는 부분이었지만, 더미 데이터 사용
+        const dummyConversations: HistoryItem[] = [
+          { question: "테스트 질문 1", answer: "테스트 응답 1" },
+          { question: "테스트 질문 2", answer: "테스트 응답 2" },
+        ];
+        setResults(dummyConversations);
       } catch (err) {
         setError("대화 기록을 불러오지 못했습니다.");
       }
@@ -38,48 +41,21 @@ export default function AISearchPage() {
     setError(null);
 
     try {
-      // 1️⃣ PHP 서버에 POST 요청 보내기
-      const response = await fetch("http://localhost:8445/APIs/page_APIs/AISearchPage.php", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-Auth-Key": "A?5Ql1qpU9MQA?r",
+      // 📌 1️⃣ PHP 서버 요청 대신 더미 응답 사용
+      const dummyResponse = { response: "PHP 서버 가짜 응답" };
+
+      // 📌 2️⃣ AI 검색 요청도 제거하고 더미 응답 사용
+      const dummyAIResponse = { answer: "AI 가짜 응답" };
+
+      // 📌 3️⃣ 결과 저장 (더미 데이터 사용)
+      const newHistory = [
+        ...results,
+        {
+          question: query,
+          answer: dummyAIResponse.answer || dummyResponse.response || "검색 결과가 없습니다.",
         },
-        body: `question=${encodeURIComponent(query)}`,
-      });
-
-      const responseText = await response.text();
-      const data = JSON.parse(responseText);
-      const phpResults = data.length > 0 ? data : ["검색 결과가 없습니다."];
-
-      // 2️⃣ AI 검색 요청
-      const aiResponse = await fetch("/api/aisearch", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question: query, contexts: results }), // results를 context로 사용
-      });
-
-      if (!aiResponse.ok) {
-        const errorData = await aiResponse.json();
-        throw new Error(errorData.error || "AI 검색 요청 실패");
-      }
-
-      const aiData = await aiResponse.json();
-
-      // 3️⃣ 결과 저장 (PHP 결과 + AI 응답)
-      const newHistory = [...results, { question: query, answer: aiData.answer || phpResults.join("\n") }];
+      ];
       setResults(newHistory);
-
-      // DB에 대화 기록 저장
-      await fetch("/api/saveConversation", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ question: query, answer: aiData.answer || phpResults.join("\n") }),
-      });
 
       setQuery(""); // 검색어 초기화
     } catch (err) {
