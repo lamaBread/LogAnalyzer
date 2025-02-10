@@ -12,7 +12,7 @@ services:
       - ./frontend:/app # 로컬 frontend 폴더를 컨테이너의 /app에 마운트
     ports:
       - "127.0.0.1:8445:3000" # 로컬호스트 8445번 포트를 컨테이너의 3000번 포트에 연결 (8445를 'log-analyzer' 서브도메인을 처리하는 프록시 주소로 설정함.)
-    command: /bin/sh -c "npm install && npm run dev" # 개발 서버 실행 명령
+    command: /bin/sh -c "npm install && npm install bcrypt && npm run dev" # 개발 서버 실행 명령
     environment:
       # 환경 변수 NODE_ENV로 실행 모드를 지정
       NODE_ENV: development # 현재는 개발 모드 활성화
