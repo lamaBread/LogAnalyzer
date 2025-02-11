@@ -1,33 +1,68 @@
-import { NextResponse } from "next/server";
-import pool from "@/app/lib/db";
+import { NextApiRequest, NextApiResponse } from 'next';
+import pool from '@/app/lib/db'; // 이제 connection 대신 pool을 임포트합니다.
 
-export async function POST(req: Request) {
+// 대화 기록을 DB에 저장하는 함수
+const saveConversationToDB = async (question: string, answer: string, contexts: { question: string; answer: string }[]) => {
+  const connection = await pool.getConnection(); // 커넥션 풀에서 커넥션을 가져옵니다.
+
   try {
-    const { question, contexts } = await req.json();
+    await connection.beginTransaction(); // 트랜잭션 시작
 
-    if (!question || question.trim().length < 1) {
-      return NextResponse.json({ error: "검색어를 입력하세요." }, { status: 400 });
+    // 1️⃣ 대화 기록을 `conversation` 테이블에 저장
+    const [conversationResult]: any = await connection.query(
+      'INSERT INTO conversation (question, answer) VALUES (?, ?)',
+      [question, answer]
+    );
+
+    const conversationId = conversationResult?.insertId;
+    if (!conversationId) {
+      throw new Error('대화 기록 저장 실패: insertId가 없습니다.');
     }
 
-    // 1️⃣ AI 응답 예제 (실제 AI 로직 적용 가능)
-    const aiAnswer = `AI는 당신이 묻는 질문: ${question}에 대해 이렇게 답변합니다.`;
-
-    // 2️⃣ DB에 대화 저장 (pool.execute() 사용)
-    try {
-      await pool.execute(
-        "INSERT INTO conversation (question, answer) VALUES (?, ?)",
-        [question, aiAnswer]
-      );
-    } catch (dbError) {
-      console.error("❌ DB 저장 오류:", dbError);
-      return NextResponse.json({ error: "데이터베이스 저장 실패" }, { status: 500 });
+    // 2️⃣ `contexts`가 있다면 `context` 테이블에 저장
+    if (contexts && contexts.length > 0) {
+      for (const context of contexts) {
+        await connection.query(
+          'INSERT INTO context (conversation_id, context_question, context_answer) VALUES (?, ?, ?)',
+          [conversationId, context.question, context.answer]
+        );
+      }
     }
 
-    // 3️⃣ 응답 반환
-    return NextResponse.json({ question, answer: aiAnswer });
-
+    await connection.commit(); // 트랜잭션 커밋
+    return conversationId;
   } catch (error) {
-    console.error("❌ API 오류:", error);
-    return NextResponse.json({ error: "서버 오류 발생" }, { status: 500 });
+    await connection.rollback(); // 오류 발생 시 트랜잭션 롤백
+    console.error('DB 저장 실패:', error);
+    throw new Error('DB 저장 실패');
+  } finally {
+    connection.release(); // 커넥션을 풀에 반환
   }
-}
+};
+
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
+  if (req.method === 'POST') {
+    const { question, contexts } = req.body;
+
+    if (!question || !contexts) {
+      return res.status(400).json({ error: '잘못된 입력입니다.' });
+    }
+
+    try {
+      // AI 응답을 생성 (여기서는 임시로 "AI의 답변" 사용)
+      const aiAnswer = `AI의 답변: ${question}`;
+
+      // DB에 대화 기록 저장
+      const conversationId = await saveConversationToDB(question, aiAnswer, contexts);
+
+      // 저장된 데이터를 포함한 응답을 클라이언트로 반환
+      res.status(200).json({ answer: aiAnswer, conversationId });
+    } catch (error) {
+      res.status(500).json({ error: '서버 오류가 발생했습니다.' });
+    }
+  } else {
+    res.status(405).json({ error: 'Method Not Allowed' });
+  }
+};
+
+export default handler;

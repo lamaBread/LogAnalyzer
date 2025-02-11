@@ -9,7 +9,7 @@
 [Sun Jan 19 06:44:05.104854 2025] [mpm_prefork:notice] [pid 1194] AH00163: Apache/2.4.58 (Ubuntu) OpenSSL/3.0.13 configured -- resuming normal operations
 [Sun Jan 19 06:44:05.104866 2025] [core:notice] [pid 1194] AH00094: Command line: '/usr/sbin/apache2'
 [Sun Jan 19 06:44:07.722740 2025] [mpm_prefork:notice] [pid 1194] AH00171: Graceful restart requested, doing restart
-[Sun Jan 19 06:44:07.739374 2025] [mpm_prefork:notice] [pid 1194] AH00163: Apache/2.4.58 (Ubuntu) OpenSSL/3.0.13 configured -- resuming normal operations
+[Sun Jan 19 06:44:07a.739374 2025] [mpm_prefork:notice] [pid 1194] AH00163: Apache/2.4.58 (Ubuntu) OpenSSL/3.0.13 configured -- resuming normal operations
 [Sun Jan 19 06:44:07.739382 2025] [core:notice] [pid 1194] AH00094: Command line: '/usr/sbin/apache2'
 [Sun Jan 19 06:45:27.565069 2025] [authz_core:error] [pid 266722] [client 207.154.197.113:35700] AH01630: client denied by server configuration: /var/www/html/server-status
 [Sun Jan 19 06:45:35.577994 2025] [php:error] [pid 266720] [client 207.154.197.113:35764] script '/var/www/html/info.php' not found or unable to stat
