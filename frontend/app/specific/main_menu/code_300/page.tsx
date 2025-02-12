@@ -2,32 +2,41 @@
 
 import React, { useState, useEffect } from "react";
 import StatusLayout from "../../../components/StatusLayout";
-import { PageCall } from "../../../lib/pageCall";
+import { getLogs } from "@/app/lib/getLogs";
 
 export default function Code300Page() {
-  const [variable1, setVariable1] = useState<string | null>(null);
+  const [logs, setLogs] = useState<string[]>([]);
 
   useEffect(() => {
-      async function fetchData() {
-        try {
-          const data = await PageCall('300');
-          
-          
-          setVariable1(data.mainText);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
+    async function fetchData() {
+      try {
+        const logs = await getLogs('statusCode');  // 배열이 반환됨.
+        const filteredLogs = Object.keys(logs)
+          .filter(key => key.startsWith('3'))
+          .flatMap(key => logs[key]);
+        setLogs(filteredLogs);
+      } catch (error) {
+        console.error("Error fetching data:", error);
       }
-  
-      fetchData();
-    }, []);
-  
+    }
+
+    fetchData();
+  }, []);
+
   return (
     <div>
       <StatusLayout>
-        <h1 className="text-2xl font-bold mb-4">Status Code 300</h1>  
+        <h1 className="text-2xl font-bold mb-4">Status Code 300-399</h1>
       </StatusLayout>
-      {variable1 ? <div dangerouslySetInnerHTML={{ __html: variable1 }} /> : <p>Loading...</p>}
+      {logs.length > 0 ? (
+        <div>
+          {logs.map((log, index) => (
+            <div key={index}>{log}</div>
+          ))}
+        </div>
+      ) : (
+        <p>No result...</p>
+      )}
     </div>
-    );
+  );
 }
