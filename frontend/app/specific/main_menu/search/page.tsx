@@ -19,11 +19,10 @@ export default function SearchPage() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php", {
+      const response = await fetch("http://localhost:8445/APIs/searchLogs.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "X-Auth-Key": "A?5Ql1qpU9MQA?r",
         },
         body: `question=${encodeURIComponent(query)}`,
       });
@@ -31,8 +30,12 @@ export default function SearchPage() {
       if (!response.ok) {
         throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
       }
-
-      const data = await response.json();
+      
+      const responseText = await response.text();
+      console.log("Response Text:", responseText); // Log the response text
+  
+      const data = JSON.parse(responseText);
+      
       setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]);
 
       // 검색 기록 추가 (최대 10개 유지)

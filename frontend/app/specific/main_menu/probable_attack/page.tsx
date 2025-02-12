@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import StatusLayout from "../../../components/StatusLayout";
-import { PageCall } from "../../../lib/pageCall";
 
 export default function nomal_access() {
     const [variable1, setVariable1] = useState<string | null>(null);
@@ -10,10 +9,7 @@ export default function nomal_access() {
           useEffect(() => {
               async function fetchData() {
                 try {
-                  const data = await PageCall('probPage');
-                  
-                  
-                  setVariable1(data.mainText);
+                  // 의심되는 로그 출력.
                 } catch (error) {
                   console.error("Error fetching data:", error);
                 }
