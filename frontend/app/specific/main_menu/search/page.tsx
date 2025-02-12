@@ -30,8 +30,12 @@ export default function SearchPage() {
       if (!response.ok) {
         throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
       }
-
-      const data = await response.json();
+      
+      const responseText = await response.text();
+      console.log("Response Text:", responseText); // Log the response text
+  
+      const data = JSON.parse(responseText);
+      
       setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]);
 
       // 검색 기록 추가 (최대 10개 유지)

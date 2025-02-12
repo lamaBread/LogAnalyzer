@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import StatusLayout from "../../../components/StatusLayout";
-import { PageCall } from "../../../lib/pageCall";
+import { getLogs } from "@/app/lib/getLogs";
 
 export default function Code100Page() {
   const [variable1, setVariable1] = useState<string | null>(null);
@@ -10,10 +10,10 @@ export default function Code100Page() {
   useEffect(() => {
       async function fetchData() {
         try {
-          const data = await PageCall('100');
+          const logs = getLogs('100');
+          const parsedLogs = JSON.parse(await logs);
           
-          
-          setVariable1(data.mainText);
+          setVariable1(await parsedLogs);
         } catch (error) {
           console.error("Error fetching data:", error);
         }

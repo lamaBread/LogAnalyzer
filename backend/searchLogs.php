@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $log_file_path = './LOG/combine_error.log';  // Log file path
+        $log_file_path = './LOG/test_log';  // 로그 파일 경로. (테스트용 임시 파일 경로임)
         $logs = readLogFileToArray($log_file_path);
 
         $question = htmlspecialchars($_POST['question'], ENT_QUOTES, 'UTF-8');  // 사용자 입력 이스케이프.
