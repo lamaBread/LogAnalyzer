@@ -19,11 +19,10 @@ export default function SearchPage() {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:8445/APIs/page_APIs/searchLogs.php", {
+      const response = await fetch("http://localhost:8445/APIs/searchLogs.php", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-          "X-Auth-Key": "A?5Ql1qpU9MQA?r",
         },
         body: `question=${encodeURIComponent(query)}`,
       });
