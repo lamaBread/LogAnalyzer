@@ -45,8 +45,8 @@ services:
     image: ollama/ollama # Ollama 이미지 사용
     container_name: ollama # Docker 컨테이너 이름
     restart: unless-stopped # 컨테이너가 중지되면 자동으로 재시작
-    expose:
-      - "11434" # 내부적으로만 11434번 포트 노출
+    ports:
+      - "127.0.0.1:11434:11434" # 로컬호스트 11434번 포트를 컨테이너의 11434번 포트에 연결
     volumes:
       - ollama_data:/root/.ollama  # 모델 데이터를 유지하기 위해 볼륨 마운트
     entrypoint: ["/bin/sh", "-c"] # 셸을 사용하여 명령 실행

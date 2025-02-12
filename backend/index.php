@@ -1,3 +1,6 @@
+<?php
+    // 디렉토리 인덱싱 차단용 index.php 파일.
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
