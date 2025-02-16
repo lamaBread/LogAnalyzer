@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 const bcrypt = require("bcryptjs");
 
-const hashedPassword = "$2a$10$ABCDEFG1234567890abcdefgHIJKL1234567890"; // 실제 비밀번호 해시 (bcrypt로 생성)
+// 생성된 해시값
+const hashedPassword = "$2b$10$g/6Pz0jFKGR6rnQiuvU4culIgSlgKD4LxI5S5KCIyiHVoWx9XoBUW";
 
 export async function POST(req: NextRequest) {
   const { password } = await req.json();
 
+  // 비밀번호와 해시값 비교
   const isMatch = await bcrypt.compare(password, hashedPassword);
 
   if (isMatch) {
