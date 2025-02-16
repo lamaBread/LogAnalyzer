@@ -17,9 +17,15 @@ export default function PasswordPage() {
     const data = await res.json();
     if (data.success) {
       document.cookie = "password_verified=true; path=/";
-      window.location.href = "/login"; // 로그인 페이지로 이동
+      window.location.href = "/"; // 메인 페이지로 이동
     } else {
       setError("비밀번호가 일치하지 않습니다.");
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSubmit(e);  // 엔터키 눌렀을 때 `handleSubmit` 호출
     }
   };
 
@@ -28,10 +34,10 @@ export default function PasswordPage() {
       display: "flex",
       justifyContent: "center",
       alignItems: "center",
-      height: "100vh", // 화면 전체를 차지하도록 설정
-      width: "100vw",  // 화면 전체 너비 차지
-      backgroundColor: "#f0f0f0", // 배경 색상 추가 (필요시)
-      position: "absolute",  // 위치 고정
+      height: "100vh",
+      width: "100vw",
+      backgroundColor: "#f0f0f0",
+      position: "absolute",
       top: 0,
       left: 0,
     }}>
@@ -42,6 +48,7 @@ export default function PasswordPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          onKeyDown={handleKeyDown}  // 엔터키 이벤트 추가
           style={{
             padding: "10px",
             margin: "10px 0",
