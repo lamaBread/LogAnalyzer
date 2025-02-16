@@ -21,4 +21,9 @@ export const getConversations = async () => {
   }
 };
 
+export const query = async (sql: string, values?: any) => {
+  const [rows] = await pool.execute(sql, values);
+  return rows;
+};
+
 export default pool; // 다른 곳에서 pool을 사용할 수 있도록 내보냄

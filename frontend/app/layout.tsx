@@ -3,6 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import DarkModeToggle from "./components/darkmodetoggle";
 import NotificationButton from "./components/NotificationButton";
+import LogoutButton from "./components/LogoutButton"; // 로그아웃 버튼 컴포넌트 추가
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -37,20 +38,8 @@ export default function RootLayout({
             <div className="flex items-center space-x-4">
               {/* 알림 버튼 */}
               <NotificationButton />
-              {/* 로그인 버튼 */}
-              <Link
-                href="/specific/login"
-                className="px-3 py-1 text-black hover:border-b-2 hover:border-black dark:text-white dark:hover:border-white"
-              >
-                Login
-              </Link>
-              {/* 회원가입 버튼 */}
-              <Link
-                href="/specific/register"
-                className="px-3 py-1 text-black hover:border-b-2 hover:border-black dark:text-white dark:hover:border-white"
-              >
-                Sign up
-              </Link>
+              {/* 로그아웃 버튼 */}
+              <LogoutButton />
               {/* 다크 모드 토글 */}
               <DarkModeToggle />
             </div>
