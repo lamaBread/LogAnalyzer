@@ -8,31 +8,34 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [theme, setTheme] = useState("light");
   const [font, setFont] = useState("sans-serif");
+  const [fontSize, setFontSize] = useState("16px");
   const [logPath, setLogPath] = useState("");
 
   useEffect(() => {
-    // localStorage에서 저장된 테마 & 폰트 불러오기
     const savedTheme = localStorage.getItem("theme");
     const savedFont = localStorage.getItem("font");
+    const savedFontSize = localStorage.getItem("fontSize");
     if (savedTheme) setTheme(savedTheme);
     if (savedFont) setFont(savedFont);
+    if (savedFontSize) setFontSize(savedFontSize);
   }, []);
 
   useEffect(() => {
-    // 테마 변경 시 다크모드 또는 라이트모드 적용
     if (theme === "dark") {
-      document.body.classList.add("dark");
+      document.documentElement.classList.add("dark");
     } else {
-      document.body.classList.remove("dark");
+      document.documentElement.classList.remove("dark");
     }
   }, [theme]);
 
   useEffect(() => {
-    // 폰트 변경
     document.body.style.fontFamily = font;
   }, [font]);
 
-  // 비밀번호 변경 요청
+  useEffect(() => {
+    document.body.style.fontSize = fontSize;
+  }, [fontSize]);
+
   const handleChangePassword = async () => {
     const res = await fetch("/api/change-password", {
       method: "POST",
@@ -49,21 +52,18 @@ export default function SettingsPage() {
     }
   };
 
-  // 테마 변경 (localStorage 저장)
-  const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newTheme = e.target.value;
-    setTheme(newTheme);
-    localStorage.setItem("theme", newTheme);
-  };
-
-  // 폰트 변경 (localStorage 저장)
   const handleFontChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newFont = e.target.value;
     setFont(newFont);
     localStorage.setItem("font", newFont);
   };
 
-  // 로그 파일 경로 저장
+  const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newFontSize = e.target.value;
+    setFontSize(newFontSize);
+    localStorage.setItem("fontSize", newFontSize);
+  };
+
   const handleLogPathSave = async () => {
     const res = await fetch("/api/set-log-path", {
       method: "POST",
@@ -82,7 +82,6 @@ export default function SettingsPage() {
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">설정</h1>
 
-      {/* 비밀번호 변경 */}
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">비밀번호 변경</h2>
         <input
@@ -104,34 +103,48 @@ export default function SettingsPage() {
         </button>
       </div>
 
-      {/* 화면 테마 변경 */}
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">화면 테마</h2>
-        <select value={theme} onChange={handleThemeChange} className="p-2 border rounded">
-          <option value="light">라이트 모드</option>
-          <option value="dark">다크 모드</option>
-        </select>
+        <DarkModeToggle />
       </div>
 
-      {/* 글꼴 변경 */}
-      <div className="space-y-2">
-        <h2 className="text-lg font-semibold">글꼴 설정</h2>
-        <select value={font} onChange={handleFontChange} className="p-2 border rounded">
-          <option value="sans-serif">기본</option>
-          <option value="serif">세리프</option>
-          <option value="monospace">모노스페이스</option>
-        </select>
+      <div className="flex space-x-4"> {/* flex로 두 항목을 가로로 배치 */}
+        <div className="space-y-2 w-1/2"> {/* 글꼴 설정 */}
+          <h2 className="text-lg font-semibold">글꼴 설정</h2>
+          <select
+            value={font}
+            onChange={handleFontChange}
+            className="p-2 border rounded w-full dark:text-black"
+          >
+            <option value="sans-serif">기본</option>
+            <option value="serif">세리프</option>
+            <option value="monospace">모노스페이스</option>
+          </select>
+        </div>
+
+        <div className="space-y-2 w-1/2"> {/* 글씨 크기 설정 */}
+          <h2 className="text-lg font-semibold">글씨 크기 설정</h2>
+          <select
+            value={fontSize}
+            onChange={handleFontSizeChange}
+            className="p-2 border rounded w-full dark:text-black"
+          >
+            <option value="14px">작게</option>
+            <option value="16px">보통</option>
+            <option value="18px">크게</option>
+            <option value="20px">매우 크게</option>
+          </select>
+        </div>
       </div>
 
-      {/* 로그 파일 경로 설정 */}
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold">로그 파일 경로</h2>
+        <h2 className="text-lg font-semibold ">로그 파일 경로</h2>
         <input
           type="text"
           placeholder="예: /var/logs/app.log"
           value={logPath}
           onChange={(e) => setLogPath(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded dark:text-black"
         />
         <button onClick={handleLogPathSave} className="px-4 py-2 bg-gray-600 text-white rounded">
           저장
