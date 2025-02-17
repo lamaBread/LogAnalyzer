@@ -92,14 +92,14 @@ export default function Page() {
 
       {/* 오른쪽: 서버 정보 */}
       <div className="w-1/2 p-2 bg-white rounded-lg dark:bg-gray-800">
-        <h1 className="text-3xl font-bold">서버 정보</h1>
-        <div className="mt-4">
-          <button onClick={fetchPageData} className="btn btn-primarye underline">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-3xl font-bold">서버 정보</h1>
+          <button onClick={fetchPageData} className="p-2 bg-blue-500 text-white rounded">
             보고서 생성 {loading && <span><small>최초 응답까지 약 10초 ~ 5분 정도 소요됩니다</small>&nbsp;&nbsp; Loading{loadingSymbol}</span>} {/* 로딩 중일 때 기호 표시 */}
           </button>
-          <div className="mt-4 markdown-container">
-            <div ref={outputRef}></div> {/* LLM 응답을 표시할 위치 */}
-          </div>
+        </div>
+        <div className="mt-4 markdown-container">
+          <div ref={outputRef}></div> {/* LLM 응답을 표시할 위치 */}
         </div>
       </div>
     </div>

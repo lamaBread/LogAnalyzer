@@ -12,6 +12,7 @@ export default function Code200Page() {
   const [logs, setLogs] = useState<string[]>([]);
   const reportRef = useRef<HTMLDivElement>(null);
   const leadingPrompt = "Analyze the logs with status codes ranging from 200 to 299 and generate a security report about the server status within 100 words.";
+  const [loadingSymbol, setLoadingSymbol] = useState<string>('.');
 
   useEffect(() => {
     async function fetchData() {
@@ -29,6 +30,18 @@ export default function Code200Page() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (loading) {
+      const symbols = ['.', '..', '...', ''];
+      let index = 0;
+      const interval = setInterval(() => {
+        setLoadingSymbol(symbols[index]);
+        index = (index + 1) % symbols.length;
+      }, 500);
+      return () => clearInterval(interval);
+    }
+  }, [loading]);
+
   async function handleAnalyze() {
     setLoading(true);
     await fetchLogsAndGenerateReport(logs, leadingPrompt, reportRef);
@@ -45,7 +58,7 @@ export default function Code200Page() {
           <h1 className="text-2xl font-bold">Status Code 200-299</h1>
           <button onClick={handleAnalyze} className="p-2 bg-blue-500 text-white rounded">
             {!loading && <span>Analyze</span>}
-            {loading && <span>Loading...</span>}
+            {loading && <span>Loading{loadingSymbol}</span>}
           </button>
         </div>
         <div ref={reportRef} className="mb-4 markdown-container"></div>
