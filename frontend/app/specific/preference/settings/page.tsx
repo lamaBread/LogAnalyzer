@@ -1,41 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useTheme } from "../../../context/ThemeContext"; // ThemeContext에서 useTheme 가져오기
 import DarkModeToggle from "../../../components/darkmodetoggle"; // 경로를 실제 경로로 수정
 
 export default function SettingsPage() {
+  const { theme, setTheme } = useTheme();  // useTheme 훅을 사용하여 테마 상태 관리
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [theme, setTheme] = useState("light");
   const [font, setFont] = useState("sans-serif");
   const [fontSize, setFontSize] = useState("16px");
   const [logPath, setLogPath] = useState("");
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const savedFont = localStorage.getItem("font");
-    const savedFontSize = localStorage.getItem("fontSize");
-    if (savedTheme) setTheme(savedTheme);
-    if (savedFont) setFont(savedFont);
-    if (savedFontSize) setFontSize(savedFontSize);
-  }, []);
-
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [theme]);
-
-  useEffect(() => {
-    document.body.style.fontFamily = font;
-  }, [font]);
-
-  useEffect(() => {
-    document.body.style.fontSize = fontSize;
-  }, [fontSize]);
-
+  // 비밀번호 변경 처리 함수
   const handleChangePassword = async () => {
     const res = await fetch("/api/change-password", {
       method: "POST",
@@ -52,18 +29,21 @@ export default function SettingsPage() {
     }
   };
 
+  // 글꼴 변경 처리 함수
   const handleFontChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newFont = e.target.value;
     setFont(newFont);
     localStorage.setItem("font", newFont);
   };
 
+  // 글씨 크기 변경 처리 함수
   const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newFontSize = e.target.value;
     setFontSize(newFontSize);
     localStorage.setItem("fontSize", newFontSize);
   };
 
+  // 로그 파일 경로 저장 함수
   const handleLogPathSave = async () => {
     const res = await fetch("/api/set-log-path", {
       method: "POST",
@@ -141,7 +121,7 @@ export default function SettingsPage() {
         <h2 className="text-lg font-semibold ">로그 파일 경로</h2>
         <input
           type="text"
-          placeholder="예: /var/logs/app.log"
+          placeholder="예: C:\ProgramData\YourAppName\logs"
           value={logPath}
           onChange={(e) => setLogPath(e.target.value)}
           className="w-full p-2 border rounded dark:text-black"
