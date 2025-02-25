@@ -30,7 +30,7 @@ export default function PasswordPage() {
       document.cookie = "password_verified=true; path=/";
       window.location.href = "/"; // 메인 페이지로 이동
     } else {
-      setError("비밀번호가 일치하지 않습니다.");
+      setError("비밀번호가 일치하지 않습니다..");
     }
   };
 
