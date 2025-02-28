@@ -2,10 +2,15 @@
 
 import React, { useState, useEffect } from "react";
 import { chatLLM } from "../../../lib/chatLLM";
+import { getLogs } from "../../../lib/getLogs";
+import { marked } from 'marked';
+import '../../../styles/markdown.css';
 
 interface HistoryItem {
-  role: "user" | "assistant";  // 사용자 또는 AI 응답 구분
+  role: "user" | "assistant" | "system";  // 시스템 역할 추가
   content: string;            // 실제 메시지 내용
+  parsedContent?: string;     // 마크다운 파싱된 내용
+  displayContent?: string;    // UI에 표시될 내용 (사용자 원본 입력)
 }
 
 export default function AISearchPage() {
@@ -25,23 +30,61 @@ export default function AISearchPage() {
     setError(null);
     setCurrentResponse("");
 
-    const newMessage: HistoryItem = { role: "user", content: query };
-    const updatedHistory = [...history, newMessage];
-    setHistory(updatedHistory);
-
+    // UI에 표시할 메시지와 LLM에 보낼 메시지 분리
+    const userInputForDisplay = query; // 화면에 표시할 사용자 입력
+    const userInputForLLM = `Based on the log file provided by the system, please respond to the following question for security exploration: ${query}`;
+    
+    const newMessage: HistoryItem = { 
+      role: "user", 
+      content: userInputForLLM,
+      displayContent: userInputForDisplay
+    };
+    
     try {
-      let fullResponse = "";  // AI 응답을 누적하여 저장할 변수
-      for await (const chunk of chatLLM(updatedHistory)) {  // 스트리밍으로 들어오는 응답을 실시간으로 화면에 표시
+      let fullResponse = "";
+      
+      // LLM에 보낼 히스토리 따로 준비 (displayContent 제외)
+      let llmHistory = history.map(item => ({
+        role: item.role,
+        content: item.content
+      }));
+      
+      let updatedLLMHistory = [...llmHistory, {
+        role: "user",
+        content: userInputForLLM
+      }];
+      
+      // 시스템 메시지가 아직 없는 경우(최초 검색 시)에만 로그를 가져와 시스템 메시지로 추가
+      const hasSystemMessage = history.some(item => item.role === "system");
+      
+      if (!hasSystemMessage) {
+        let fullLogArray = await getLogs('classifying');
+        const logText = fullLogArray.join('\n');
+        const systemMessage = { 
+          role: "system" as const, 
+          content: `The following is the system logs: ${logText}` 
+        };
+        
+        // 시스템 메시지를 맨 앞에 추가
+        updatedLLMHistory = [systemMessage, ...updatedLLMHistory];
+      }
+      
+      // 대화 기록 UI 업데이트 (사용자 메시지만 먼저 추가)
+      setHistory(prev => [...prev, newMessage]);
+      
+      for await (const chunk of chatLLM(updatedLLMHistory)) {
         if (chunk.message?.content) {
           fullResponse += chunk.message.content;
           setCurrentResponse(fullResponse);
         }
         
-        // 응답이 완료되면 전체 대화 기록에 추가
         if (chunk.done) {
+          // 마크다운 파싱 적용
+          const parsedContent = await marked(fullResponse);
           setHistory(prev => [...prev, { 
             role: "assistant", 
-            content: fullResponse
+            content: fullResponse,
+            parsedContent: parsedContent
           }]);
           setCurrentResponse("");
         }
@@ -74,7 +117,8 @@ export default function AISearchPage() {
                   {history.map((item, index) => (
                     <li key={index} className="flex flex-col space-y-2 border-b py-2">
                       <div className={item.role === "user" ? "text-blue-500" : "text-green-500"}>
-                        {item.role === "user" ? "Q: " : "A: "}{item.content}
+                        {item.role === "user" ? "Q: " : "A: "}
+                        {item.displayContent || item.content}
                       </div>
                     </li>
                   ))}
@@ -96,13 +140,16 @@ export default function AISearchPage() {
                   {item.role === "user" ? (
                     <div className="flex justify-end">
                       <div className="bg-blue-500 text-white p-3 rounded-lg max-w-xs">
-                        {item.content}
+                        {item.displayContent || item.content}
                       </div>
                     </div>
                   ) : (
                     <div className="flex justify-start">
-                      <div className="bg-gray-200 text-black p-3 rounded-lg max-w-xs">
-                        {item.content}
+                      <div className="bg-gray-200 text-black p-3 rounded-lg max-w-xs markdown-container">
+                        {item.parsedContent ? 
+                          <div dangerouslySetInnerHTML={{ __html: item.parsedContent }} /> : 
+                          item.content
+                        }
                       </div>
                     </div>
                   )}
