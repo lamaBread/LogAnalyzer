@@ -4,7 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "./context/ThemeContext";
 import NotificationButton from "./components/NotificationButton";
 import LogoutButton from "./components/LogoutButton";
-import DarkModeToggle from "./components/DarkModeToggle"; // 클라이언트 컴포넌트
+import DarkModeToggle from "./components/darkmodetoggle"; // 클라이언트 컴포넌트
 
 export const metadata: Metadata = {
   title: "Create Next App",
