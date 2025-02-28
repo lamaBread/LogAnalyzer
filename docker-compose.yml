@@ -72,8 +72,10 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql      # 데이터 영구 저장
       - ./mysql/init:/docker-entrypoint-initdb.d  # 초기화 스크립트
-    ports:
-      - "127.0.0.1:3306:3306"         # localhost에서만 접근 가능
+    #ports:
+    #  - "127.0.0.1:3306:3306"         # localhost에서만 접근 가능
+    expose:
+      - "3306"  # 내부적으로만 3306번 포트 노출함.
     networks:
       - loganalyzer_net # 지정된 네트워크에 연결
 
