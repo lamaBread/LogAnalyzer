@@ -9,8 +9,9 @@ export async function getLogs(type: string) {
         const response = await callLogAPI('group_by_statusCode_array.php');  // 상태코드별로 묶인 로그를 가져온다.
         return response;  // 배열이 반환됨.
   
-      } else if (type === 'normal' || type === 'probable' || type === 'suspicious') {
-        const response = await callLogAPI('log_array.php');  // 가공되지 않은 로그를 가져온다. (하나의 행에 하나의 로그.)
+      } else if (type === 'classifying') {
+        // test_log 파일은 error_log이다.
+        const response = await callLogAPI('log_array.php', './LOG/test_log');  // 가공되지 않은 로그를 가져온다. (하나의 행에 하나의 로그.)
         return response;  // 배열이 반환됨.
 
 
