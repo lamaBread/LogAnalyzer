@@ -21,3 +21,7 @@ CREATE TABLE context (
   context_answer TEXT NOT NULL,
   FOREIGN KEY (conversation_id) REFERENCES conversation(id)
 );
+
+
+GRANT ALL PRIVILEGES ON conversations.* TO 'loguser!'@'localhost' IDENTIFIED BY 'your_password';
+FLUSH PRIVILEGES;
