@@ -2,14 +2,15 @@ import mysql from "mysql2/promise";
 
 // MySQL 커넥션 풀 설정
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'rootpw',
-  database: 'conversations',
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
   queueLimit: 0,
 });
+
 
 // 대화 기록 조회 함수
 export const getConversations = async () => {

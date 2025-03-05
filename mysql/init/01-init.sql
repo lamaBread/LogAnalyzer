@@ -13,3 +13,15 @@ CREATE TABLE conversation (
     font_size VARCHAR(10),
     log_path VARCHAR(255)
 );
+
+CREATE TABLE context (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  conversation_id INT NOT NULL,
+  context_question TEXT NOT NULL,
+  context_answer TEXT NOT NULL,
+  FOREIGN KEY (conversation_id) REFERENCES conversation(id)
+);
+
+
+GRANT ALL PRIVILEGES ON conversations.* TO 'loguser!'@'localhost' IDENTIFIED BY 'your_password';
+FLUSH PRIVILEGES;

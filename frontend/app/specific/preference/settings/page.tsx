@@ -69,7 +69,7 @@ export default function SettingsPage() {
           placeholder="현재 비밀번호"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
-          className="w-full p-2 border rounded"
+          className="w-full p-2 border rounded dark:text-black"
         />
         <input
           type="password"
