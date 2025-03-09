@@ -1,30 +1,48 @@
 import mysql from "mysql2/promise";
+import { RowDataPacket } from 'mysql2';
 
 // MySQL 커넥션 풀 설정
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: 'mysql',
+  user: 'root',
+  password: 'rootpw',
+  database: 'conversations',
   waitForConnections: true,
-  connectionLimit: Number(process.env.DB_CONNECTION_LIMIT) || 10,
+  connectionLimit: 10,
   queueLimit: 0,
 });
 
-
-// 대화 기록 조회 함수
-export const getConversations = async () => {
+// 대화 기록 조회 함수 (conversation만 조회)
+export const getConversations = async (): Promise<RowDataPacket[]> => {
   try {
     const [rows] = await pool.query('SELECT * FROM conversation ORDER BY created_at DESC');
-    return rows;
+    return rows as RowDataPacket[]; // 명시적으로 타입을 RowDataPacket[]로 지정
   } catch (err) {
     console.error("Error fetching conversations:", err);
     throw new Error('대화 기록을 가져오는 데 실패했습니다.');
   }
 };
 
+// 대화 기록과 관련된 context 조회 함수
+export const getConversationsWithContext = async (): Promise<any[]> => {
+  try {
+    const [rows] = await pool.query(
+      `SELECT c.id, c.question, c.answer, c.created_at, ctx.context_question, ctx.context_answer
+       FROM conversation c
+       LEFT JOIN context ctx ON c.id = ctx.conversation_id
+       ORDER BY c.created_at DESC`
+    );
+    return rows as RowDataPacket[]; // 명시적으로 타입을 RowDataPacket[]로 지정
+  } catch (err) {
+    console.error("Error fetching conversations with context:", err);
+    throw new Error('대화 기록 및 관련 컨텍스트를 가져오는 데 실패했습니다.');
+  }
+};
+
+// 일반적인 쿼리 실행 함수
 export const query = async (sql: string, values?: any) => {
   try {
+    console.log("Executing query:", sql, "with values:", values);
     const [rows] = await pool.execute(sql, values);
     return rows;
   } catch (err) {
