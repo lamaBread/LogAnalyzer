@@ -20,7 +20,7 @@ export default function Page() {
     } else if (status === "2") {
       return "🌥️"; // 흐림
     } else if (status === "3") {
-      return "⛈️"; // 비
+      return "⛈️"; // 비.
     }
     return null;
   };

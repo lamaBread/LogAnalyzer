@@ -1,7 +1,6 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import pool from '@/app/lib/db'; // pool을 임포트합니다.
 
-// 대화 기록을 DB에 저장하는 함수
 const saveConversationToDB = async (question: string, answer: string, contexts: { question: string; answer: string }[]) => {
   let connection;
   try {
@@ -12,7 +11,7 @@ const saveConversationToDB = async (question: string, answer: string, contexts: 
 
     // 1️⃣ 대화 기록을 `conversation` 테이블에 저장
     const [conversationResult]: any = await connection.query(
-      'INSERT INTO conversation (question, answer) VALUES (?, ?)',
+      'INSERT INTO conversation (question, answer, created_at) VALUES (?, ?, NOW())',
       [question, answer]
     );
 
@@ -23,12 +22,14 @@ const saveConversationToDB = async (question: string, answer: string, contexts: 
 
     // 2️⃣ `contexts`가 있다면 `context` 테이블에 저장
     if (contexts && contexts.length > 0) {
+      console.log(`Contexts 저장 시작:`, contexts); // 디버깅 로그
       for (const context of contexts) {
         await connection.query(
           'INSERT INTO context (conversation_id, context_question, context_answer) VALUES (?, ?, ?)',
           [conversationId, context.question, context.answer]
         );
       }
+      console.log(`Contexts 저장 완료`); // 디버깅 로그
     }
 
     await connection.commit(); // 트랜잭션 커밋
