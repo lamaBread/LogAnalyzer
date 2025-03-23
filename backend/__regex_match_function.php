@@ -33,6 +33,26 @@ function readAttackRegexPatterns() {
     return $patterns;
 }
 
+//????????
+/**
+ * Ensures a regex pattern has proper delimiters
+ * @param string $pattern The regex pattern to format
+ * @return string Properly formatted regex pattern
+ */
+function formatRegexPattern($pattern) {
+    // Check if the pattern already has delimiters (first and last char are the same non-alphanumeric)
+    $firstChar = substr($pattern, 0, 1);
+    $lastChar = substr($pattern, -1);
+    
+    // If already has matching delimiters that are valid, return as is
+    if ($firstChar === $lastChar && !ctype_alnum($firstChar) && $firstChar !== '\\') {
+        return $pattern;
+    }
+    
+    // Otherwise, add '/' delimiters
+    return '/' . str_replace('/', '\\/', $pattern) . '/';
+}
+
 /**
  * Checks if a log entry matches any attack pattern
  * @param string $logEntry The log entry to check
@@ -42,11 +62,15 @@ function readAttackRegexPatterns() {
 function isLogSuspicious($logEntry, $patterns) {
     foreach ($patterns as $pattern) {
         try {
-            if (preg_match($pattern, $logEntry)) {
+            // Format the pattern with proper delimiters
+            $formattedPattern = formatRegexPattern($pattern);
+            
+            if (@preg_match($formattedPattern, $logEntry)) {
                 return true;
             }
         } catch (Exception $e) {
-            // Handle potentially invalid regex patterns
+            // Log the error but continue checking other patterns
+            error_log("Invalid regex pattern: " . $pattern . ". Error: " . $e->getMessage());
             continue;
         }
     }
