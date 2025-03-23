@@ -141,6 +141,7 @@ export default function SuspiciousActivity() {
                   <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort("suspiciousCount")}>
                     Suspicious Logs {sortBy === "suspiciousCount" && (sortDirection === "asc" ? "↑" : "↓")}
                   </th>
+                  {/* <th className="py-2 px-4 border-b">Attack Types</th> */}
                   <th className="py-2 px-4 border-b">Details</th>
                 </tr>
               </thead>
@@ -156,17 +157,52 @@ export default function SuspiciousActivity() {
                     </td>
                     <td className="py-2 px-4 border-b">{item.totalLogs}</td>
                     <td className="py-2 px-4 border-b">{item.suspiciousCount}</td>
+                    {/* <td className="py-2 px-4 border-b">
+                      {item.detectedAttacks && item.detectedAttacks.length > 0 ? (
+                        <details className="cursor-pointer">
+                          <summary className="text-blue-600 hover:text-blue-800">
+                            {item.detectedAttacks.length} type(s) detected
+                          </summary>
+                          <div className="mt-2 ml-4 text-sm">
+                            <ul className="list-disc ml-4 mt-2 text-gray-700">
+                              {item.detectedAttacks.map((attack: any, index: number) => (
+                                <li key={index} className="mb-2">
+                                  <div className="font-semibold">{attack.attackType}</div>
+                                  <div className="text-gray-600 ml-2">{attack.attackDetails}</div>
+                                  <div className="text-gray-500 ml-2 text-xs">Found in {attack.count} log(s)</div>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </details>
+                      ) : (
+                        <span className="text-gray-500 italic">None</span>
+                      )}
+                    </td> */}
                     <td className="py-2 px-4 border-b">
                       <details className="cursor-pointer">
                         <summary className="text-blue-600 hover:text-blue-800">
-                          Show suspicious logs ({item.suspiciousLogs.length})
+                          Show suspicious logs ({item.suspiciousLogs?.length || 0})
                         </summary>
                         <div className="mt-2 ml-4 text-sm">
-                          {item.suspiciousLogs.length > 0 ? (
+                          {item.suspiciousLogs && item.suspiciousLogs.length > 0 ? (
                             <ul className="list-disc ml-4 mt-2 text-gray-700">
-                              {item.suspiciousLogs.map((log: string, index: number) => (
-                                <li key={index} className="mb-1 break-all">
-                                  <code className="bg-gray-100 px-1">{log}</code>
+                              {item.suspiciousLogs.map((logItem: any, index: number) => (
+                                <li key={index} className="mb-3 break-all">
+                                  <code className="bg-gray-100 px-1 block mb-2">{typeof logItem === 'object' ? logItem.log : logItem}</code>
+                                  {typeof logItem === 'object' && logItem.detectedPatterns && (
+                                    <div className="mt-1 ml-2">
+                                      <p className="text-xs font-semibold text-gray-600">Detected patterns:</p>
+                                      <ul className="list-circle ml-4">
+                                        {logItem.detectedPatterns.map((pattern: any, patternIndex: number) => (
+                                          <li key={patternIndex} className="text-xs mt-1">
+                                            <span className="font-medium">{pattern.attackType}:</span> {pattern.attackDetails}
+                                            <div className="text-gray-500">Pattern: <code>{pattern.pattern}</code></div>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
                                 </li>
                               ))}
                             </ul>
