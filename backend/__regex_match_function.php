@@ -56,32 +56,49 @@ function isLogSuspicious($logEntry, $patterns) {
 /**
  * Analyzes logs by IP to detect potential attacks
  * @param array $ipGroupedLogs Logs grouped by IP address
- * @return array Map of IP addresses to suspicion scores
+ * @return array Map of IP addresses to analysis results containing:
+ *               - score: Suspicion score (0-1)
+ *               - totalLogs: Total number of logs for this IP
+ *               - suspiciousCount: Number of logs flagged as suspicious
+ *               - suspiciousLogs: Array of suspicious log entries
  */
 function analyzeLogsForAttacks($ipGroupedLogs) {
     $patterns = readAttackRegexPatterns();
-    $suspicionScores = [];
+    $results = [];
     
     foreach ($ipGroupedLogs as $ip => $logs) {
         $totalLogs = count($logs);
         if ($totalLogs === 0) {
-            $suspicionScores[$ip] = 0;
+            $results[$ip] = [
+                'score' => 0,
+                'totalLogs' => 0,
+                'suspiciousCount' => 0,
+                'suspiciousLogs' => []
+            ];
             continue;
         }
         
-        $suspiciousLogs = 0;
+        $suspiciousCount = 0;
+        $suspiciousLogs = [];
+        
         foreach ($logs as $log) {
             if (isLogSuspicious($log, $patterns)) {
-                $suspiciousLogs++;
+                $suspiciousCount++;
+                $suspiciousLogs[] = $log;
             }
         }
         
-        // If all logs are suspicious, score is 1
-        // If no logs are suspicious, score is 0
-        // Otherwise, it's the ratio of suspicious logs to total logs, rounded to 2 decimal places
-        $suspicionScores[$ip] = ($suspiciousLogs === $totalLogs) ? 1 : 
-                               (($suspiciousLogs === 0) ? 0 : round($suspiciousLogs / $totalLogs, 2));  // return level of suspicion for each IP address
+        // Calculate the suspicion score
+        $score = ($suspiciousCount === $totalLogs) ? 1 : 
+                (($suspiciousCount === 0) ? 0 : round($suspiciousCount / $totalLogs, 2));
+        
+        $results[$ip] = [
+            'score' => $score,
+            'totalLogs' => $totalLogs,
+            'suspiciousCount' => $suspiciousCount,
+            'suspiciousLogs' => $suspiciousLogs
+        ];
     }
     
-    return $suspicionScores;
+    return $results;
 }
