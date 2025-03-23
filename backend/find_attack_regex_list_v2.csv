@@ -1,0 +1,39 @@
+Attack Type,Attack Details,Search Regex
+SQL injection,SQL 구문 키워드 (대소문자 무시),/\b(SELECT|INSERT|UPDATE|DELETE|UNION|DROP|CREATE\s+TABLE|ALTER\s+TABLE|EXEC|DECLARE|CAST)\b/i
+,조건 로직 조작 키워드 (대소문자 무시),/\b(AND\s+1=1|OR\s+1=1|OR\s+['"]\w+['"]=['"]\w+|LIKE\s+[%_]|IS\s+NULL|IS\s+NOT\s+NULL|['"]\s*=\s*['"]\s*OR|\bXOR\b)/i
+,SQL 특수 문자와 SQL 키워드 조합,/(\%27|\')\s*(OR|AND|SELECT|UNION|DECLARE|CAST)/i
+,`UNION SELECT` 구문 (대소문자 무시),/UNION\s+ALL\s+SELECT|UNION\s+SELECT/i
+,`DROP TABLE` 구문 (대소문자 무시),/DROP\s+TABLE/i
+,SQL 서버 확장 저장 프로시저 (대소문자 무시),/\b(xp_cmdshell|xp_regaddmultistring|xp_regdeletekey|xp_regdeletevalue|xp_regenumkeys|xp_regenumvalues|xp_regread|xp_regremovemultistring|xp_regwrite)\b/i
+,"시간 기반 블라인드 SQL 인젝션 함수 (MySQL, PostgreSQL)",/\b(BENCHMARK|pg_sleep|sleep)\s*\(\s*\d+/i
+XSS (크로스사이트 스크립팅),`<script>` 태그 (대소문자 무시),/<script[\s\S]*?>[\s\S]*?<\/script>|<script[\s\S]*?>/i
+,JavaScript 이벤트 핸들러 (대소문자 무시),/\bon(load|error|mouse(over|out|down|up|move)|click|focus|blur|change|submit|select|key(up|down|press))\s*=/i
+,`javascript:` URL 스킴 (대소문자 무시),/javascript:|vbscript:|data:text\/html/i
+,`alert()` 함수 (대소문자 무시),/\b(alert|confirm|prompt)\s*\([^)]*\)/i
+,`eval()` 함수 (대소문자 무시),/\b(eval|setTimeout|setInterval)\s*\([^)]*\)/i
+,`document.cookie` 접근 (대소문자 무시),/document\.cookie/i
+,`window.location` 조작 (대소문자 무시),/\b(window\.location|location\.href|location\.replace)/i
+,`<img>` 태그 `src` 속성 내 `javascript:` (대소문자 무시),/<img[\s\S]*?src\s*=\s*(['"]?)javascript:[^>]*>/i
+,`<iframe>` 태그 (대소문자 무시),/<iframe[\s\S]*?>/i
+디렉토리 탐색,`../` 시퀀스 (대소문자 무시),/\.\.\//i
+,`..%2F` 시퀀스 (대소문자 무시),/\.\.%2F/i
+,`%2E%2E%2F` 시퀀스 (대소문자 무시),/%2E%2E%2F/i
+,`%2e%2e/` 시퀀스 (대소문자 무시),/%2e%2e\//i
+,`..\` 시퀀스 (대소문자 무시),/\.\.\\/i
+,`..%5C` 시퀀스 (대소문자 무시),/\.\.%5C/i
+,`%2E%2E%5C` 시퀀스 (대소문자 무시),/%2E%2E%5C/i
+,`%2e%2e\` 시퀀스 (대소문자 무시),/%2e%2e\\/i
+,`/etc/passwd` 또는 `win.ini`와 같은 민감한 파일 경로 (대소문자 무시),/\/(etc\/(passwd|shadow|hosts|group)|proc\/self\/environ)|\\(windows\\system32\\|win\.ini|boot\.ini|system32)/i
+,"`file=`, `page=`, `download=`, `template=` 뒤에 `../` 또는 인코딩된 시퀀스 (대소문자 무시)",/\b(file|page|path|location|root|download|template|include|require)\s*=\s*[^&]*?(\.\.|%2e%2e|%252e%252e)/i
+명령어 삽입,쉘 명령 구분자와 명령어 조합,/[;&\|`]\s*(cat|ls|dir|rm|cp|mv|chmod|wget|curl|bash|sh|cmd|powershell)/i
+,일반적인 쉘 명령어 (대소문자 무시),/\b(exec\(|system\(|shell_exec\(|passthru\(|proc_open\(|popen\(|cmd\.exe|powershell|bash|sh|whoami|ifconfig|ipconfig|netstat|ls|dir|cat|type|rm|del|cp|copy|mv|move)\b/i
+,출력 재지향과 명령어 조합,/[><]{1,2}\s*(\/dev\/|\.txt|\.log|\.php|\.asp|\.jsp)/i
+,시간 지연을 유발하는 `ping` 명령어,/\bping\s+.*((-|\/)t|-c\s+\d+|-n\s+\d+)/i
+,아웃오브밴드 상호작용을 위한 `nslookup`,/\b(nslookup|dig|host)\s+[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,}\b/i
+파일 포함,PHP 파일 포함 함수 (대소문자 무시),/\b(include|require|include_once|require_once|fopen|file_get_contents|readfile)\s*\(\s*['"](https?:|file:|ftp:|php:|data:)/i
+,JSP 파일 포함 지시어 (대소문자 무시),/<jsp:(include|forward)[\s]+page\s*=|<c:import\s+url/i
+,"원격 파일 포함을 위한 `http://`, `https://`, `ftp://` (대소문자 무시)",/(file|include|require|include_once|require_once|path|page|template)\s*=\s*(https?|ftp|file)(:\/\/|%3A%2F%2F)/i
+,Null 바이트 삽입,/(%00|\\0|0x00)/i
+웹 취약점 스캐너 시그니처,일반적인 스캐너 관련 파일/디렉토리 (대소문자 무시),/\b(\.git\/|\.svn\/|\.DS_Store|wp-admin|phpinfo\.php|test\.php|admin\.php|setup\.php|install\.php|wp-login)/i
+,알려진 스캐너의 User-Agent 문자열 (대소문자 무시),/(OWASP[\s-]ZAP|Burp[\s-]Suite|Nessus|Acunetix|Netsparker|SQLmap|Nikto|w3af|OpenVAS|Arachni|Metasploit|masscan|zgrab|dirbuster|wfuzz|gobuster)/i
+,"IBM AppScan 페이로드 내 ""appscan"" (대소문자 무시)",/appscan/i

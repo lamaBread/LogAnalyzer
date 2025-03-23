@@ -1,3 +1,0 @@
-
-
-<h1>API TEST PAGE</h1>
