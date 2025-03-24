@@ -95,7 +95,7 @@ export default function Page() {
         <h1 className="text-3xl font-bold">서버 정보</h1>
         <div className="mt-4">
           <button onClick={fetchPageData} className="btn btn-primarye underline">
-            보고서 생성 {loading && <span><small>최초 응답까지 약 10초 ~ 5분 정도 소요됩니다</small>&nbsp;&nbsp; Loading{loadingSymbol}</span>} {/* 로딩 중일 때 기호 표시 */}
+            보고서 생성 {loading && <span><small>최초 응답까지 약 10초 ~ 5분 정도 소요됩니다.</small>&nbsp;&nbsp; Loading{loadingSymbol}</span>} {/* 로딩 중일 때 기호 표시 */}
           </button>
           <div className="mt-4 markdown-container">
             <div ref={outputRef}></div> {/* LLM 응답을 표시할 위치 */}
