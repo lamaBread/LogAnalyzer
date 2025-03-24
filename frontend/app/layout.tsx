@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
 import { ThemeProvider } from "./context/ThemeContext";
-import NotificationButton from "./components/NotificationButton";
 import LogoutButton from "./components/LogoutButton";
 import DarkModeToggle from "./components/darkmodetoggle"; // 클라이언트 컴포넌트
 
@@ -38,7 +37,6 @@ export default function RootLayout({
                 </p>
               </div>
               <div className="flex items-center space-x-4">
-                <NotificationButton />
                 <LogoutButton />
                 <DarkModeToggle /> {/* 클라이언트 컴포넌트 */}
               </div>
