@@ -5,12 +5,13 @@ import { useTheme } from "../../../context/ThemeContext"; // ThemeContext에서 
 import DarkModeToggle from "../../../components/darkmodetoggle"; // 경로를 실제 경로로 수정
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme();  // useTheme 훅을 사용하여 테마 상태 관리
+  const { theme, setTheme } = useTheme(); // useTheme 훅을 사용하여 테마 상태 관리
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [font, setFont] = useState("sans-serif");
   const [fontSize, setFontSize] = useState("16px");
   const [logPath, setLogPath] = useState("");
+  const [reportEmail, setReportEmail] = useState("");
 
   // 비밀번호 변경 처리 함수
   const handleChangePassword = async () => {
@@ -29,20 +30,6 @@ export default function SettingsPage() {
     }
   };
 
-  // 글꼴 변경 처리 함수
-  const handleFontChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newFont = e.target.value;
-    setFont(newFont);
-    localStorage.setItem("font", newFont);
-  };
-
-  // 글씨 크기 변경 처리 함수
-  const handleFontSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newFontSize = e.target.value;
-    setFontSize(newFontSize);
-    localStorage.setItem("fontSize", newFontSize);
-  };
-
   // 로그 파일 경로 저장 함수
   const handleLogPathSave = async () => {
     const res = await fetch("/api/set-log-path", {
@@ -58,10 +45,26 @@ export default function SettingsPage() {
     }
   };
 
+  // 보고서 받을 이메일 저장 함수
+  const handleReportEmailSave = async () => {
+    const res = await fetch("https://your-api-endpoint.com/save-email.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({ email: reportEmail }).toString(),
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert("이메일이 저장되었습니다!");
+    } else {
+      alert("오류 발생: " + data.message);
+    }
+  };
+
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">설정</h1>
 
+      {/* 비밀번호 변경 */}
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">비밀번호 변경</h2>
         <input
@@ -83,17 +86,19 @@ export default function SettingsPage() {
         </button>
       </div>
 
+      {/* 화면 테마 */}
       <div className="space-y-2">
         <h2 className="text-lg font-semibold">화면 테마</h2>
         <DarkModeToggle />
       </div>
 
-      <div className="flex space-x-4"> {/* flex로 두 항목을 가로로 배치 */}
-        <div className="space-y-2 w-1/2"> {/* 글꼴 설정 */}
+      {/* 글꼴 및 글씨 크기 설정 */}
+      <div className="flex space-x-4">
+        <div className="space-y-2 w-1/2">
           <h2 className="text-lg font-semibold">글꼴 설정</h2>
           <select
             value={font}
-            onChange={handleFontChange}
+            onChange={(e) => setFont(e.target.value)}
             className="p-2 border rounded w-full dark:text-black"
           >
             <option value="sans-serif">기본</option>
@@ -102,11 +107,11 @@ export default function SettingsPage() {
           </select>
         </div>
 
-        <div className="space-y-2 w-1/2"> {/* 글씨 크기 설정 */}
+        <div className="space-y-2 w-1/2">
           <h2 className="text-lg font-semibold">글씨 크기 설정</h2>
           <select
             value={fontSize}
-            onChange={handleFontSizeChange}
+            onChange={(e) => setFontSize(e.target.value)}
             className="p-2 border rounded w-full dark:text-black"
           >
             <option value="14px">작게</option>
@@ -117,8 +122,9 @@ export default function SettingsPage() {
         </div>
       </div>
 
+      {/* 로그 파일 경로 */}
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold ">로그 파일 경로</h2>
+        <h2 className="text-lg font-semibold">로그 파일 경로</h2>
         <input
           type="text"
           placeholder="예: C:\ProgramData\YourAppName\logs"
@@ -128,6 +134,21 @@ export default function SettingsPage() {
         />
         <button onClick={handleLogPathSave} className="px-4 py-2 bg-gray-600 text-white rounded">
           저장
+        </button>
+      </div>
+
+      {/* 보고서 빋을 이메일 전송 */}
+      <div className="space-y-2">
+        <h2 className="text-lg font-semibold">보고서 받을 이메일</h2>
+        <input
+          type="email"
+          placeholder="이메일 입력"
+          value={reportEmail}
+          onChange={(e) => setReportEmail(e.target.value)}
+          className="w-full p-2 border rounded dark:text-black"
+        />
+        <button onClick={handleReportEmailSave} className="px-4 py-2 bg-gray-600 text-white rounded">
+          제출
         </button>
       </div>
     </div>
