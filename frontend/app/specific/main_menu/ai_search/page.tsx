@@ -89,8 +89,8 @@ export default function AISearchPage() {
         {/* AI 챗봇 */}
         <div className="w-3/4 p-2">
           <h2 className="text-2xl font-bold mb-2">AI 챗봇</h2>
-          <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
-            <div className="flex flex-col space-y-4 p-4">
+          <div className="flex flex-col border border-gray-400 rounded-md" style={{ height: "800px" }}>
+            <div className="overflow-y-auto flex flex-col h-full space-y-4 p-4">
               {history.map((item, index) => (
                 <div key={index} className="flex flex-col space-y-2">
                   {item.role === "user" ? (
@@ -123,28 +123,27 @@ export default function AISearchPage() {
                 </div>
               )}
             </div>
+            {/* 검색바 */}
+            <div className="flex p-4 border-t border-gray-300 dark:border-gray-700 flex-shrink-0">
+              <input
+                type="text"
+                placeholder="검색어를 입력하세요"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+                disabled={loading}
+                className="flex-grow p-4 border-2 rounded-md mr-4 text-xl border-gray-300 dark:border-gray-700 text-black bg-white dark:bg-gray-800 dark:text-gray-200"
+              />
+              <button
+                onClick={handleSearch}
+                disabled={loading}
+                className="px-6 py-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-xl disabled:bg-gray-400"
+              >
+                검색
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* 검색바 */}
-      <div className="flex p-4 border-t border-gray-300 dark:border-gray-700">
-        <input
-          type="text"
-          placeholder="검색어를 입력하세요"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={loading}
-          className="flex-grow p-4 border-2 rounded-md mr-4 text-xl border-gray-300 dark:border-gray-700 text-black bg-white dark:bg-gray-800 dark:text-gray-200"
-        />
-        <button
-          onClick={handleSearch}
-          disabled={loading}
-          className="px-6 py-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 text-xl disabled:bg-gray-400"
-        >
-          검색
-        </button>
       </div>
     </div>
   );
