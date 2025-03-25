@@ -20,11 +20,21 @@ if (file_exists($outputFileError)) {
     unlink($outputFileError);
 }
 
-// 추후 로그파일을 읽어오는 모듈을 작성할 것. POST 요청을 받아서, 새로운 로그로 기존 로그를 갱신하는 모듈.
-
-// 30분마다 로그파일을 읽어와 병합.
-while (true) {
-    aggregateLogs($logDir, $outputFileAccess, $logRoot, '/access.log*');
-    aggregateLogs($logDir, $outputFileError, $logRoot, '/error.log*');
-    sleep(1800); // 30 minutes
+// 로그 디렉토리가 존재하는지 확인
+if (!is_dir($logDir)) {
+    echo "Log directory not found: $logDir\n";
+    exit(1);
 }
+
+// 로그 저장 디렉토리 확인 및 생성
+if (!is_dir($logRoot)) {
+    if (!mkdir($logRoot, 0755, true)) {
+        echo "Failed to create log directory: $logRoot\n";
+        exit(1);
+    }
+}
+
+echo "Starting log file monitoring...\n";
+
+// 파일 변동을 감지하여 로그 병합
+monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot);

@@ -65,26 +65,10 @@ export default function RootLayout({
                   </li>
                   <li>
                     <Link
-                      href="/specific/main_menu/normal_access"
-                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                    >
-                      🟢 Normal Access
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
                       href="/specific/main_menu/suspicious_activity"
                       className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
                     >
                       🟡 Suspicious Activity
-                    </Link>
-                  </li>
-                  <li>
-                    <Link
-                      href="/specific/main_menu/probable_attack"
-                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                    >
-                      🔴 Probable Attack
                     </Link>
                   </li>
                   <li>
