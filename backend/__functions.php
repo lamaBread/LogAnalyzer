@@ -31,6 +31,7 @@ function groupLogsByIP($logArray) {
     foreach ($logArray as $log) {
         // Extract the IP address from the log line
         if (preg_match('/\[client ([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+):[0-9]+\]/', $log, $matches)) {
+        // if (preg_match('/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+):[0-9]+/', $log, $matches)) {    
             $ip = $matches[1];
         } else {
             $ip = 'unknown';
