@@ -15,8 +15,9 @@
     "mysql2": "^3.12.0",
     "next": "^15.0.3",
     "next-iron-session": "^4.2.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "recharts": "^2.15.1"
   },
   "devDependencies": {
     "@types/node": "^20",
