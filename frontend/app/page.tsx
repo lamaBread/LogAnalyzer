@@ -36,7 +36,7 @@ export default function Page() {
   useEffect(() => {
     const fetchVisitorData = async () => {
       try {
-        const response = await fetch("http://localhost:8445/APIs/log_visitors.php");
+        const response = await fetch("http://localhost:8445/APIs/log_graph.php");
         if (!response.ok) throw new Error("Failed to fetch visitor data");
 
         const data: VisitorData[] = await response.json();
@@ -88,22 +88,18 @@ export default function Page() {
     <div className="flex flex-grow gap-4 p-4">
       {/* 방문자 그래프 */}
       <div className="w-1/2 p-2 bg-white rounded-lg dark:bg-gray-800">
-        <h1 className="text-3xl font-bold">오늘의 상태 (1분 단위 접속자 수)</h1>
+       <h1 className="text-3xl font-bold">오늘의 상태 (1분 단위 접속자 수)</h1>
         <ResponsiveContainer width="100%" height={300}>
-          {visitorData.length > 0 ? (
-            <LineChart data={visitorData}>
-              <XAxis
-                dataKey="time"
-                tickFormatter={(tick: any) => String(tick)}
-                interval={Math.max(1, Math.floor(visitorData.length / 10))}
-              />
-              <YAxis domain={[0, maxCount > 0 ? maxCount : 10]} />
-              <Tooltip />
-              <Line type="monotone" dataKey="count" stroke="#8884d8" dot={false} />
-            </LineChart>
-          ) : (
-            <p className="text-center text-gray-500">데이터 없음</p> // 데이터가 없을 때 메시지 표시
-          )}
+          <LineChart data={visitorData.length > 0 ? visitorData : [{ time: "No Data", count: 0 }]}>
+            <XAxis
+              dataKey="time"
+              tickFormatter={(tick: any) => String(tick)}
+              interval={Math.max(1, Math.floor(visitorData.length / 10))}
+            />
+            <YAxis domain={[0, maxCount > 0 ? maxCount : 10]} />
+            <Tooltip />
+            <Line type="monotone" dataKey="count" stroke="#8884d8" dot={false} />
+          </LineChart>
         </ResponsiveContainer>
       </div>
 
