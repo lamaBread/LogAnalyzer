@@ -18,6 +18,7 @@ export default function Page() {
   const outputRef = useRef<HTMLDivElement>(null);
   const [visitorData, setVisitorData] = useState<VisitorData[]>([]);
   const [maxCount, setMaxCount] = useState<number>(10);
+  const [totalLogs, setTotalLogs] = useState<number>(0);
 
   // 로딩 중 기호 순환
   useEffect(() => {
@@ -36,13 +37,29 @@ export default function Page() {
   useEffect(() => {
     const fetchVisitorData = async () => {
       try {
-        const response = await fetch("http://localhost:8445/APIs/log_graph.php");
+        const logFilePath = "./LOG/test_log"; // 로그 파일 경로 지정
+        
+        const response = await fetch("http://localhost:8445/APIs/log_graph.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({ logFilePath }),
+        });
+
         if (!response.ok) throw new Error("Failed to fetch visitor data");
 
-        const data: VisitorData[] = await response.json();
-        const counts = data.map((d) => d.count);
-        setVisitorData(data);
-        setMaxCount(Math.max(...counts, 10)); // 최대값 계산
+        const result = await response.json();
+        
+        if (result.error) {
+          throw new Error(result.error);
+        }
+        
+        // 새로운 응답 형식 처리
+        setVisitorData(result.data);
+        setTotalLogs(result.total);
+        
+        // 최대값 계산
+        const counts = result.data.map((item: VisitorData) => item.count);
+        setMaxCount(Math.max(...counts, 10));
       } catch (error) {
         console.error("Error fetching visitor data:", error);
       }
@@ -55,7 +72,7 @@ export default function Page() {
   const fetchPageData = async () => {
     setLoading(true);
     try {
-      const logFilePath = "./LOG/test_log_access";
+      const logFilePath = "./LOG/test_log_access";  // 이곳에서는 test_log_access 로그 파일을 사용합니다. (LLM 입력 로그 수 제한 필요.)
       const logArrayResponse = await fetch("http://localhost:8445/APIs/log_array.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -88,17 +105,18 @@ export default function Page() {
     <div className="flex flex-grow gap-4 p-4">
       {/* 방문자 그래프 */}
       <div className="w-1/2 p-2 bg-white rounded-lg dark:bg-gray-800">
-       <h1 className="text-3xl font-bold">오늘의 상태 (1분 단위 접속자 수)</h1>
+        <h1 className="text-3xl font-bold">오늘의 상태 (10분 단위 접속자 수)</h1>
+        <p className="text-sm text-gray-600 mt-1">최근 24시간 내 총 로그 수: {totalLogs}</p>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={visitorData.length > 0 ? visitorData : [{ time: "No Data", count: 0 }]}>
             <XAxis
               dataKey="time"
               tickFormatter={(tick: any) => String(tick)}
-              interval={Math.max(1, Math.floor(visitorData.length / 10))}
+              interval={Math.max(1, Math.floor(visitorData.length / 12))} // 표시되는 간격 조정
             />
             <YAxis domain={[0, maxCount > 0 ? maxCount : 10]} />
             <Tooltip />
-            <Line type="monotone" dataKey="count" stroke="#8884d8" dot={false} />
+            <Line type="monotone" dataKey="count" stroke="#8884d8" dot={false} /> {/* 점 표시 활성화 여부 */}
           </LineChart>
         </ResponsiveContainer>
       </div>
