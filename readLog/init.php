@@ -8,7 +8,8 @@ if (php_sapi_name() !== 'cli') {
 include_once 'functions.php';
 
 $logDir = '/webLogs';
-$logRoot = '/var/www/html/LOG';
+// $logRoot = '/var/www/html/LOG';
+$logRoot = '/Users/sihun/testlogForLA';  // for mac test log dir.
 $outputFileAccess = $logRoot . '/combine_access.log';
 $outputFileError = $logRoot . '/combine_error.log';
 
