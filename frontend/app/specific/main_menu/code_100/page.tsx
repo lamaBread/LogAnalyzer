@@ -56,7 +56,7 @@ export default function Code100Page() {
       <StatusLayout>
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Status Code 100-199</h1>
-          <button onClick={handleAnalyze} className="p-2 bg-blue-500 text-white rounded">
+          <button onClick={handleAnalyze} className="p-2 bg-gray-500 text-white rounded">
             {!loading && <span>Analyze</span>}
             {loading && <span>Loading{loadingSymbol}</span>}
           </button>
