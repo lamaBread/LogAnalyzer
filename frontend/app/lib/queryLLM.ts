@@ -1,4 +1,4 @@
-export async function* queryLLM(userPrompt: string, model: string = 'llama3.2') {
+export async function* queryLLM(userPrompt: string, model: string = 'llama3.2:1b') {
     try {
       const response = await fetch(`http://127.0.0.1:11434/api/generate`, {
         method: 'POST',

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import "./globals.css";
-import DarkModeToggle from "./components/darkmodetoggle";
-import NotificationButton from "./components/NotificationButton";
+import { ThemeProvider } from "./context/ThemeContext";
+import LogoutButton from "./components/LogoutButton";
+import DarkModeToggle from "./components/darkmodetoggle"; // 클라이언트 컴포넌트
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -15,132 +16,102 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Log Analyzer</title>
-      </head>
-      <body className="bg-white text-black dark:bg-gray-900 dark:text-white">
-        <div className="min-h-screen flex flex-col">
-          <header className="bg-gray-200 text-white p-4 dark:bg-gray-800 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">
-                <Link href="/" className="text-black dark:text-white">
-                  🏠 Log Analyzer
-                </Link>
-              </h1>
-              <p className="text-lg text-black dark:text-white">
-                A tool that helps you to analyze your log files
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              {/* 알림 버튼 */}
-              <NotificationButton />
-              {/* 로그인 버튼 */}
-              <Link
-                href="/specific/login"
-                className="px-3 py-1 text-black hover:border-b-2 hover:border-black dark:text-white dark:hover:border-white"
-              >
-                Login
-              </Link>
-              {/* 회원가입 버튼 */}
-              <Link
-                href="/specific/register"
-                className="px-3 py-1 text-black hover:border-b-2 hover:border-black dark:text-white dark:hover:border-white"
-              >
-                Sign up
-              </Link>
-              {/* 다크 모드 토글 */}
-              <DarkModeToggle />
-            </div>
-          </header>
-          <main className="flex flex-1">
-            <nav className="w-1/5 bg-gray-200 p-4 dark:bg-gray-800">
-              <ul className="space-y-2">
-                <div>
-                  <h1 className="font-bold">MAIN MENU</h1>
-                </div>
-                <li>
-                  <Link
-                    href="/specific/main_menu/ai_search"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    🔎 AI Search
+    <ThemeProvider>
+      <html lang="en">
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <title>Log Analyzer</title>
+        </head>
+        <body className="bg-white text-black dark:bg-gray-900 dark:text-white">
+          <div className="min-h-screen flex flex-col">
+            <header className="bg-gray-200 text-white p-4 dark:bg-gray-800 flex justify-between items-center">
+              <div>
+                <h1 className="text-3xl font-bold">
+                  <Link href="/" className="text-black dark:text-white">
+                    🏠 Log Analyzer
                   </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/specific/main_menu/search"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    🔎 Search
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/specific/main_menu/normal_access"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    🟢 Normal Access
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/specific/main_menu/suspicious_activity"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    🟡 Suspicious Activity
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/specific/main_menu/probable_attack"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    🔴 Probable Attack
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/specific/main_menu/code_200"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    Status Codes
-                  </Link>
-                </li>
-                <div>
-                  <h1 className="font-bold">PREFERENCE</h1>
-                </div>
-                <li>
-                  <Link
-                    href="/specific/preference/settings"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    ⚙️ Settings
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/specific/preference/help_center"
-                    className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
-                  >
-                    ❓ Help Center
-                  </Link>
-                </li>
-              </ul>
-            </nav>
-            <div className="w-4/5 p-4">
-              <div className="bg-white shadow-md rounded p-4 dark:bg-gray-800">
-                {children}
+                </h1>
+                <p className="text-lg text-black dark:text-white">
+                  A tool that helps you to analyze your log files
+                </p>
               </div>
-            </div>
-          </main>
-          <footer className="bg-gray-800 text-white p-4 text-center dark:bg-gray-900">
-            &copy; 2024 Log Analyzer. All rights reserved.
-          </footer>
-        </div>
-      </body>
-    </html>
+              <div className="flex items-center space-x-4">
+                <LogoutButton />
+                <DarkModeToggle /> {/* 클라이언트 컴포넌트 */}
+              </div>
+            </header>
+            <main className="flex flex-1">
+              <nav className="w-1/5 bg-gray-200 p-4 dark:bg-gray-800">
+                <ul className="space-y-2">
+                  <div>
+                    <h1 className="font-bold">MAIN MENU</h1>
+                  </div>
+                  <li>
+                    <Link
+                      href="/specific/main_menu/ai_search"
+                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                    >
+                      🔎 AI Search
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/specific/main_menu/search"
+                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                    >
+                      🔎 Search
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/specific/main_menu/suspicious_activity"
+                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                    >
+                      🟡 Suspicious Activity
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/specific/main_menu/code_200"
+                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                    >
+                      Status Codes
+                    </Link>
+                  </li>
+                  <div>
+                    <h1 className="font-bold">PREFERENCE</h1>
+                  </div>
+                  <li>
+                    <Link
+                      href="/specific/preference/settings"
+                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                    >
+                      ⚙️ Settings
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      href="/specific/preference/help_center"
+                      className="hover:bg-gray-300 dark:hover:bg-gray-700 px-2 py-1 rounded transition-colors"
+                    >
+                      ❓ Help Center
+                    </Link>
+                  </li>
+                </ul>
+              </nav>
+              <div className="w-4/5 p-4">
+                <div className="bg-white shadow-md rounded p-4 dark:bg-gray-800">
+                  {children}
+                </div>
+              </div>
+            </main>
+            <footer className="bg-gray-800 text-white p-4 text-center dark:bg-gray-900">
+              &copy; 2024 Log Analyzer. All rights reserved.
+            </footer>
+          </div>
+        </body>
+      </html>
+    </ThemeProvider>
   );
 }
