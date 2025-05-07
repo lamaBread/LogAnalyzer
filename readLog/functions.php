@@ -192,6 +192,7 @@ function monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot)
  * @param array $logs 평가할 로그 배열
  */
 function sendLogsForEvaluation($logs) {
+    // First send to the backend evaluation API
     $evaluationEndpoint = 'http://localhost:8445/APIs/evaluate_raw_logs.php';
     
     // 로그 데이터 준비
@@ -213,6 +214,113 @@ function sendLogsForEvaluation($logs) {
         echo "Logs successfully sent for evaluation.\n";
     } else {
         echo "Failed to send logs for evaluation. HTTP code: $httpCode, Response: $response\n";
+    }
+    
+    // Now process each log and send to the alert display page
+    $alertDisplayEndpoint = 'http://localhost:8003/index.php';
+    
+    // Load attack regex patterns
+    $patternsFile = '/var/www/LogAnalyzer/backend/find_attack_regex_list_v2.csv';
+    $patterns = [];
+    
+    if (file_exists($patternsFile)) {
+        $file = fopen($patternsFile, "r");
+        if ($file) {
+            // Skip header line
+            fgetcsv($file);
+            
+            $currentAttackType = "";
+            
+            while (($data = fgetcsv($file)) !== false) {
+                if (isset($data[2]) && !empty($data[2])) {
+                    // Track the attack type (first column)
+                    if (!empty($data[0])) {
+                        $currentAttackType = $data[0];
+                    }
+                    
+                    // Remove quotes around the regex if they exist
+                    $pattern = $data[2];
+                    $pattern = trim($pattern, '"');
+                    
+                    // Store pattern with its attack type and details
+                    $patterns[] = [
+                        'attackType' => $currentAttackType,
+                        'attackDetails' => $data[1] ?? '',
+                        'pattern' => $pattern
+                    ];
+                }
+            }
+            fclose($file);
+        }
+    }
+    
+    // Function to check if a log is suspicious
+    function checkLogSuspicious($logEntry, $patterns) {
+        // Skip empty log entries
+        if (empty(trim($logEntry))) {
+            return [];
+        }
+        
+        $matches = [];
+        foreach ($patterns as $patternData) {
+            $pattern = $patternData['pattern'];
+            
+            // Simple pattern formatting
+            if (substr($pattern, 0, 1) !== '/') {
+                $pattern = '/' . str_replace('/', '\\/', $pattern) . '/';
+            }
+            
+            // Try to match the pattern
+            $isMatch = @preg_match($pattern, $logEntry);
+            
+            // If matched, record it
+            if ($isMatch) {
+                $matches[] = [
+                    'attackType' => $patternData['attackType'],
+                    'attackDetails' => $patternData['attackDetails'],
+                    'pattern' => $pattern
+                ];
+            }
+        }
+        
+        return $matches;
+    }
+    
+    // Process each log and send to alert display
+    foreach ($logs as $log) {
+        // Skip empty lines or headers
+        if (empty(trim($log)) || strpos($log, '---') === 0) {
+            continue;
+        }
+        
+        // Evaluate the log for suspicious activity
+        $suspicious = checkLogSuspicious($log, $patterns);
+        $isSuspicious = !empty($suspicious);
+        
+        // Prepare data for alert display
+        $alertData = [
+            'log_entry' => $log,
+            'timestamp' => date('Y-m-d H:i:s'),
+            'is_suspicious' => $isSuspicious ? 1 : 0,
+            'attack_details' => json_encode($suspicious)
+        ];
+        
+        // Send to alert display page
+        $ch = curl_init($alertDisplayEndpoint);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($alertData));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        
+        if ($httpCode != 200) {
+            echo "Failed to send log to alert display. HTTP code: $httpCode\n";
+        }
+        
+        // Add a small delay to avoid overwhelming the server
+        usleep(50000); // 50ms delay
     }
 }
 ?>
