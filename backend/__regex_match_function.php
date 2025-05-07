@@ -132,34 +132,49 @@ function extractUrlFromLog($logEntry) {
         'body' => ''
     ];
     
-    // HTTP 메소드와 URL 추출 (더 다양한 형식 지원)
-    if (preg_match('/(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\s+([^\s?]+)(\?[^\s]*)?/i', $logEntry, $urlMatches)) {
-        $result['method'] = $urlMatches[1] ?? '';
-        $result['path'] = $urlMatches[2] ?? '';
-        $result['query'] = $urlMatches[3] ?? '';
-        $result['fullUrl'] = ($urlMatches[2] ?? '') . ($urlMatches[3] ?? '');
-    }
-    // URL 패턴만 추출 (HTTP 메소드가 없는 경우)
-    else if (preg_match('/https?:\/\/[^\/]+(\/[^\s\?]*)?(\?[^\s]*)?/i', $logEntry, $urlMatches)) {
-        $result['path'] = $urlMatches[1] ?? '';
-        $result['query'] = $urlMatches[2] ?? '';
-        $result['fullUrl'] = ($urlMatches[1] ?? '') . ($urlMatches[2] ?? '');
-    }
-    // 중간에 URL만 있는 경우 (예: "Requested URL: /path?query")
-    else if (preg_match('/(?:URL|URI|Path):\s+([^\s?]+)(\?[^\s]*)?/i', $logEntry, $urlMatches)) {
-        $result['path'] = $urlMatches[1] ?? '';
-        $result['query'] = $urlMatches[2] ?? '';
-        $result['fullUrl'] = ($urlMatches[1] ?? '') . ($urlMatches[2] ?? '');
-    }
+    // 로그 타입 확인 (access log vs error log)
+    $isAccessLog = preg_match('/(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)/i', $logEntry);
+    $isErrorLog = preg_match('/\[(.*?) (.*?) (.*?)\]/i', $logEntry) && !$isAccessLog;
     
-    // 헤더 정보 추출 (User-Agent, Referer 등)
-    if (preg_match('/User-Agent:\s+([^\r\n]+)/i', $logEntry, $uaMatches)) {
-        $result['headers'] .= ' ' . ($uaMatches[1] ?? '');
-    }
-    
-    // 요청 바디 추출 시도 (POST 데이터 등)
-    if (preg_match('/\r\n\r\n(.*?)(?:\r\n|$)/s', $logEntry, $bodyMatches)) {
-        $result['body'] = $bodyMatches[1] ?? '';
+    // Access Log 처리
+    if ($isAccessLog) {
+        // HTTP 메소드와 URL 추출 (더 다양한 형식 지원)
+        if (preg_match('/(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)\s+([^\s?]+)(\?[^\s]*)?/i', $logEntry, $urlMatches)) {
+            $result['method'] = $urlMatches[1] ?? '';
+            $result['path'] = $urlMatches[2] ?? '';
+            $result['query'] = $urlMatches[3] ?? '';
+            $result['fullUrl'] = ($urlMatches[2] ?? '') . ($urlMatches[3] ?? '');
+        }
+        // URL 패턴만 추출 (HTTP 메소드가 없는 경우)
+        else if (preg_match('/https?:\/\/[^\/]+(\/[^\s\?]*)?(\?[^\s]*)?/i', $logEntry, $urlMatches)) {
+            $result['path'] = $urlMatches[1] ?? '';
+            $result['query'] = $urlMatches[2] ?? '';
+            $result['fullUrl'] = ($urlMatches[1] ?? '') . ($urlMatches[2] ?? '');
+        }
+        
+        // 헤더 정보 추출 (User-Agent, Referer 등)
+        if (preg_match('/User-Agent:\s+([^\r\n]+)/i', $logEntry, $uaMatches)) {
+            $result['headers'] .= ' ' . ($uaMatches[1] ?? '');
+        }
+        
+        // 요청 바디 추출 시도 (POST 데이터 등)
+        if (preg_match('/\r\n\r\n(.*?)(?:\r\n|$)/s', $logEntry, $bodyMatches)) {
+            $result['body'] = $bodyMatches[1] ?? '';
+        }
+    } 
+    // Error Log 처리
+    else if ($isErrorLog) {
+        // 에러 로그에서 API 경로나 파일 경로를 추출 시도
+        if (preg_match('/\b(\/[^\s:"\'\[\]]*)\b/', $logEntry, $pathMatches)) {
+            $result['path'] = $pathMatches[1] ?? '';
+            $result['fullUrl'] = $result['path'];
+        }
+        
+        // script filename이나 requested path 추출 시도
+        if (preg_match('/(PHP Warning|PHP Notice|PHP Fatal error).*?in (.*?) on line/i', $logEntry, $errorMatches)) {
+            $result['fullUrl'] = $errorMatches[2] ?? '';
+            $result['headers'] = $errorMatches[1] ?? ''; // 에러 타입을 헤더로 저장
+        }
     }
     
     return $result;
@@ -333,12 +348,21 @@ function isLogSuspiciousFullScan($logEntry, $patterns) {
         return $matches;
     }
     
+    // 로그 타입 확인 (access log vs error log)
+    $isAccessLog = preg_match('/(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS|CONNECT|TRACE)/i', $logEntry);
+    $isErrorLog = preg_match('/\[(.*?) (.*?) (.*?)\]/i', $logEntry) && !$isAccessLog;
+    
     // 일관된 로깅을 위한 패턴 캐시
     static $failedPatterns = [];
     
     foreach ($patterns as $patternData) {
         $attackType = $patternData['attackType'];
         $pattern = $patternData['pattern'];
+        
+        // 너무 일반적인 패턴 필터링 (일부 에러 로그의 경우에는 제외)
+        if (!$isErrorLog && isTooGeneralPattern($pattern, $attackType)) {
+            continue;
+        }
         
         try {
             // 정규식 패턴 포맷팅
@@ -353,7 +377,7 @@ function isLogSuspiciousFullScan($logEntry, $patterns) {
                 continue;
             }
             
-            // 모든 패턴을 로그 전체에 직접 적용
+            // 패턴 매칭 시도
             $isMatch = @preg_match($formattedPattern, $logEntry);
             
             // 오류 처리

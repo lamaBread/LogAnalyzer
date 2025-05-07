@@ -87,7 +87,7 @@ export default function SuspiciousActivity() {
             type="text"
             value={filePath}
             onChange={(e) => setFilePath(e.target.value)}
-            placeholder="Enter log file path (e.g., /var/log/apache2/access.log)"
+            placeholder="Enter log file path (e.g., ./LOG/combine_access.log)"
             className="flex-grow p-2 border rounded-md"
             required
           />
