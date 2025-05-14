@@ -155,7 +155,10 @@ function getAttackDetections($db, $logId) {
                                                 <li>
                                                     <div class="detection-type"><?php echo htmlspecialchars($detection['attack_type']); ?></div>
                                                     <div class="detection-details"><?php echo htmlspecialchars($detection['attack_details']); ?></div>
-                                                    <div class="detection-pattern">Pattern: <code><?php echo htmlspecialchars($detection['pattern']); ?></code></div>
+                                                    <div class="detection-pattern">
+                                                        <span class="pattern-label">Detected Pattern:</span> 
+                                                        <code class="highlight-regex"><?php echo htmlspecialchars($detection['pattern']); ?></code>
+                                                    </div>
                                                 </li>
                                             <?php endforeach; ?>
                                         </ul>

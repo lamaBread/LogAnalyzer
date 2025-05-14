@@ -157,24 +157,33 @@ function monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot)
             $newErrorLogs = [];
             
             if ($currentAccessLines > $previousAccessLines) {
-                // 새 접근 로그 추출
+                // 새 접근 로그 추출 및 전처리
                 $accessLogContents = file($outputFileAccess);
                 $newAccessLogs = array_slice($accessLogContents, $previousAccessLines);
+                $newAccessLogs = array_map('trim', $newAccessLogs); // 각 줄의 앞뒤 공백 제거
                 echo "Found " . count($newAccessLogs) . " new access log entries.\n";
             }
             
             if ($currentErrorLines > $previousErrorLines) {
-                // 새 에러 로그 추출
+                // 새 에러 로그 추출 및 전처리
                 $errorLogContents = file($outputFileError);
                 $newErrorLogs = array_slice($errorLogContents, $previousErrorLines);
+                $newErrorLogs = array_map('trim', $newErrorLogs); // 각 줄의 앞뒤 공백 제거
                 echo "Found " . count($newErrorLogs) . " new error log entries.\n";
             }
             
             // 새 로그가 있으면 평가 API로 전송
             $newLogs = array_merge($newAccessLogs, $newErrorLogs);
+            
+            // 빈 줄 제거 (trim 후 빈 문자열인 요소 필터링)
+            $newLogs = array_filter($newLogs, function($line) {
+                return trim($line) !== '';
+            });
+            
             if (!empty($newLogs)) {
                 echo "Sending " . count($newLogs) . " new logs for evaluation...\n";
-                sendLogsForEvaluation($newLogs);
+                echo "Result: " . sendLogsForEvaluation($newLogs) . "\n";
+                echo "Logs: " . print_r($newLogs, true) . "\n";
             }
             
             // 처리된 라인 수 업데이트
@@ -192,14 +201,18 @@ function monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot)
  * @param array $logs 평가할 로그 배열
  */
 function sendLogsForEvaluation($logs) {
-    $url = 'http://localhost:8445/APIs/alertDisplayPage/log_evaluate.php'; // 평가 스크립트 URL
+    // php-apache 컨테이너 입장에서는, 마운트 포인트가 /var/www/html 이다.
+
+    $url = 'http://php-apache/alertDisplayPage/log_evaluate.php';
     
     // curl 초기화
     $ch = curl_init($url);
-    
+
     // POST 요청 설정
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, ['logs' => $logs]);
+    // 배열을 JSON으로 변환하여 전송
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['logs' => $logs]));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
     // 요청 실행
@@ -210,8 +223,34 @@ function sendLogsForEvaluation($logs) {
         echo "Error sending logs to evaluation API: " . curl_error($ch) . "\n";
         $success = false;
     } else {
-        echo "Logs successfully sent to evaluation API.\n";
-        $success = true;
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $responseData = json_decode($response, true);
+        
+        if ($httpCode == 200) {
+            if (isset($responseData['success']) && $responseData['success'] === true) {
+                echo "Logs successfully sent to evaluation API.\n";
+                echo "Processed: " . $responseData['total_processed'] . " logs, ";
+                echo "Suspicious: " . $responseData['suspicious_count'] . " logs.\n";
+                $success = true;
+            } else {
+                echo "API returned an error:\n";
+                if (isset($responseData['error'])) {
+                    echo "Error: " . $responseData['error'] . "\n";
+                }
+                if (isset($responseData['error_details'])) {
+                    echo "Details: " . $responseData['error_details'] . "\n";
+                }
+                $success = false;
+            }
+        } else {
+            echo "API returned HTTP code: " . $httpCode . "\n";
+            if (isset($responseData['error'])) {
+                echo "Error message: " . $responseData['error'] . "\n";
+            } else {
+                echo "Raw response: " . $response . "\n";
+            }
+            $success = false;
+        }
     }
     
     // curl 세션 종료

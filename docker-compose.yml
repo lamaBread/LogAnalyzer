@@ -37,7 +37,13 @@ services:
       - /var/log/apache2:/webLogs:ro # Apache 로그를 읽기 전용으로 마운트
       - ./readLog:/readLog # 로그를 읽어들이는 스크립트 경로 마운트.
       - ./apache:/etc/apache2/sites-available # Apache 커스텀 설정을 마운트
-    command: /bin/sh -c "apt-get update && apt-get install -y curl procps sqlite3 libsqlite3-dev && docker-php-ext-install pdo_sqlite && mkdir -p /var/www/html/LOG && php /readLog/init.php & apache2-foreground"  # PHP 스크립트 실행 후 Apache 시작 명령
+    command: >
+      /bin/sh -c "apt-get update && 
+      apt-get install -y curl procps libsqlite3-dev && 
+      docker-php-ext-install pdo_sqlite && 
+      mkdir -p /var/www/html/LOG && 
+      php /readLog/init.php & 
+      apache2-foreground"
     # procps는 ps 명령어를 위해 추가, LOG 디렉토리 생성 보장
     # 주의! command 옵션은 apache의 기본 시작 명령을 대체함. => apache2-foreground 명령으로 apache를 실행해야 한다.
     expose:

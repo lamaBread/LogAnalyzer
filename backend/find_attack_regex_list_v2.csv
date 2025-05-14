@@ -27,9 +27,9 @@ XSS (크로스사이트 스크립팅),`<script>` 태그 (대소문자 무시),/<
 ,"`file=`, `page=`, `download=`, `template=` 뒤에 `../` 또는 인코딩된 시퀀스 (대소문자 무시)",/\b(file|page|path|location|root|download|template|include|require)\s*=\s*[^&]*?(\.\.|%2e%2e|%252e%252e)/i
 명령어 삽입,쉘 명령 구분자와 명령어 조합,/[;&\|`]\s*(cat|ls|dir|rm|cp|mv|chmod|wget|curl|bash|sh|cmd|powershell)/i
 ,일반적인 쉘 명령어 (대소문자 무시),/\b(exec\(|system\(|shell_exec\(|passthru\(|proc_open\(|popen\(|cmd\.exe|powershell|bash|sh|whoami|ifconfig|ipconfig|netstat|ls|dir|cat|type|rm|del|cp|copy|mv|move)\b/i
-,출력 재지향과 명령어 조합,/[><]{1,2}\s*(\/dev\/|\.txt|\.log|\.php|\.asp|\.jsp)/i
+,출력 재지향과 명령어 조합,/[><]{1,2}\\s*(\\/dev\\/|\\.txt|\\.log|\\.php|\\.asp|\\.jsp)/i
 ,시간 지연을 유발하는 `ping` 명령어,/\bping\s+.*((-|\/)t|-c\s+\d+|-n\s+\d+)/i
-,아웃오브밴드 상호작용을 위한 `nslookup`,/\b(nslookup|dig|host)\s+[a-zA-Z0-9][-a-zA-Z0-9.]*\.[a-zA-Z]{2,}\b/i
+,아웃오브밴드 상호작용을 위한 `nslookup`,/\\b(nslookup|dig|host)\\s+[a-zA-Z0-9][-a-zA-Z0-9.]*\\.[a-zA-Z]{2,}\\b/i
 파일 포함,PHP 파일 포함 함수 (대소문자 무시),/\b(include|require|include_once|require_once|fopen|file_get_contents|readfile)\s*\(\s*['"](https?:|file:|ftp:|php:|data:)/i
 ,JSP 파일 포함 지시어 (대소문자 무시),/<jsp:(include|forward)[\s]+page\s*=|<c:import\s+url/i
 ,"원격 파일 포함을 위한 `http://`, `https://`, `ftp://` (대소문자 무시)",/(file|include|require|include_once|require_once|path|page|template)\s*=\s*(https?|ftp|file)(:\/\/|%3A%2F%2F)/i
