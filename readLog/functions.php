@@ -192,7 +192,7 @@ function monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot)
  * @param array $logs 평가할 로그 배열
  */
 function sendLogsForEvaluation($logs) {
-    $url = 'http://localhost:8003/log_evaluate.php'; // 평가 스크립트 URL
+    $url = 'http://localhost:8445/APIs/alertDisplayPage/log_evaluate.php'; // 평가 스크립트 URL
     
     // curl 초기화
     $ch = curl_init($url);

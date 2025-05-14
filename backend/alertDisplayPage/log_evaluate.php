@@ -1,6 +1,6 @@
 <?php
 // Include the file with regex matching functions
-require_once '../backend/__regex_match_function.php';
+require_once '../__regex_match_function.php';
 
 // Function to parse timestamp from a log entry
 function parseTimestampFromLog($logEntry) {
@@ -28,7 +28,11 @@ function parseTimestampFromLog($logEntry) {
 
 // Function to setup the SQLite database
 function setupDatabase() {
-    $dbFile = __DIR__ . '/logs.db';
+    // $dbFile = __DIR__ . '/logs.db';
+    $dbFile = './logs.db'; // Adjust the path as needed
+    if (!file_exists($dbFile)) {
+        touch($dbFile);
+    }
     $db = new SQLite3($dbFile);
     
     // Create logs table if it doesn't exist
