@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Web Site</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#6366F1',
+            accent: '#A78BFA'
+          },
+          fontFamily: {
+            pretendard: ['"Pretendard"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Pretendard&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-pretendard min-h-screen">
+
+  <!-- 헤더 -->
+  <header class="bg-white shadow-md py-3 px-6 flex justify-between items-center sticky top-0 z-50">
+    <h1 class="text-xl md:text-2xl font-bold text-primary">Web Site</h1>
+    <nav>
+      <ul class="flex gap-4 md:gap-6 text-gray-600 text-sm md:text-base">
+        <li><a href="#" class="hover:text-primary">홈</a></li>
+        <li><a href="#" class="hover:text-primary">서비스</a></li>
+        <li><a href="login.html" class="hover:text-primary">로그인</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- 메인 콘텐츠 -->
+  <main class="px-4 py-6 md:px-10 md:py-10 max-w-7xl mx-auto">
+    
+    <!-- 인트로 -->
+    <section class="text-center mb-8 md:mb-12">
+      <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-2">환영합니다! 👋</h2>
+      <p class="text-gray-500 text-base md:text-lg">Web Site에 오신 것을 환영해요.</p>
+    </section>
+
+    <!-- 카드 영역 -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+      <div class="bg-white p-5 md:p-6 rounded-xl shadow hover:shadow-md transition duration-200">
+        <h3 class="text-lg font-semibold text-primary mb-1">📢 공지사항</h3>
+        <p class="text-gray-600 text-sm">서비스 업데이트와 최신 소식을 빠르게 확인하세요.</p>
+      </div>
+      <div class="bg-white p-5 md:p-6 rounded-xl shadow hover:shadow-md transition duration-200">
+        <h3 class="text-lg font-semibold text-primary mb-1">📈 내 활동</h3>
+        <p class="text-gray-600 text-sm">최근 사용 기록을 한눈에 볼 수 있어요.</p>
+      </div>
+      <div class="bg-white p-5 md:p-6 rounded-xl shadow hover:shadow-md transition duration-200">
+        <h3 class="text-lg font-semibold text-primary mb-1">🧠 도구 모음</h3>
+        <p class="text-gray-600 text-sm">다양한 기능을 자유롭게 사용해보세요.</p>
+      </div>
+    </section>
+  </main>
+
+  <!-- 푸터 -->
+  <footer class="mt-16 text-center text-sm text-gray-400 py-5 border-t border-gray-300">
+    ⓒ 2025 Team CLEAR
+  </footer>
+
+</body>
+</html>
