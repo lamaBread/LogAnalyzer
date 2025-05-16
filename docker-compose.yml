@@ -73,8 +73,6 @@ services:
     networks:
       - loganalyzer_net # 지정된 네트워크에 연결
 
-
-      
   # MySQL 서비스 (데이터베이스)
   mysql:
     image: mysql:8.0 # MySQL 8.0 이미지 사용

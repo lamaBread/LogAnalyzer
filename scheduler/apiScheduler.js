@@ -1,11 +1,14 @@
 const axios = require('axios');
 
 // 서버 IP와 포트 설정
-const IP = '127.0.0.1';
-const PORT = 8445;
+const IP = '127.0.0.1';  // 컨테이너가 아닌 외부 시스템인 경우.
 
-// 요청 간격 (1분 = 60,000ms)
-const INTERVAL = 60 * 1000;
+// 컨테이너에서 호스트 시스템으로 보내는 경우.
+// const IP = 'host.docker.internal'; // Docker에서 호스트 시스템에 접근하기 위한 IP 주소
+const PORT = 80;  // 시험용 사이트는 80 포트로 설정되어 있다.
+
+// 요청 간격 설정 (단위: ms)
+const INTERVAL = 15000; // 15초
 
 // 공격용 쿼리 문자열 목록
 const attackQueries = [
@@ -150,8 +153,8 @@ async function sendRequest() {
 
     console.log(`[응답] 상태 코드: ${res.status}`);
 
-    // 응답 HTML을 한 줄로 압축하고, 앞부분 200자만 출력
-    const oneLineHTML = res.data.replace(/\s+/g, ' ').trim().slice(0, 200);
+    // 응답 HTML을 한 줄로 압축하고, 앞부분 80자만 출력
+    const oneLineHTML = res.data.replace(/\s+/g, ' ').trim().slice(0, 80);
     console.log('[응답 HTML] ');
     console.log(oneLineHTML);
 

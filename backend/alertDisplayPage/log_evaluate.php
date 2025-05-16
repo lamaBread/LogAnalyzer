@@ -81,95 +81,59 @@ function ensureDatabasePermissions($dbPath) {
 
 // New function to setup database
 function setupDatabase() {
-    // Try multiple paths in order of preference
-    $possiblePaths = [
-        __DIR__ . '/logs.db',                   // Current directory
-        sys_get_temp_dir() . '/logs.db',        // System temp directory
-        '/tmp/logs.db',                        // Linux temp directory
-        '/var/tmp/logs.db'                     // Another Linux temp directory
-    ];
+    // Only use the logs.db file in current directory
+    $dbPath = __DIR__ . '/logs.db';
     
-    $db = null;
-    $lastError = '';
-    
-    foreach ($possiblePaths as $dbPath) {
-        try {
-            // Try to create directory if it doesn't exist
-            $dbDir = dirname($dbPath);
-            if (!file_exists($dbDir)) {
-                @mkdir($dbDir, 0777, true);
-            }
-            
-            // Try to use this path
-            $db = new SQLite3(
-                $dbPath,
-                SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE
-            );
-            
-            // Test write permissions with a simple query
-            if ($db->exec("CREATE TABLE IF NOT EXISTS test_table (id INTEGER)")) {
-                // Success! We have a writable database
-                error_log("Successfully connected to database at: " . $dbPath);
-                break;
-            } else {
-                // This path didn't work, close and try next one
-                $lastError = $db->lastErrorMsg();
-                $db->close();
-                $db = null;
-            }
-        } catch (Exception $e) {
-            $lastError = $e->getMessage();
-            // Continue to next path
-        }
-    }
-    
-    // If all paths failed, try in-memory database
-    if (!$db) {
-        try {
-            error_log("All database paths failed. Last error: " . $lastError);
-            error_log("Attempting to use in-memory SQLite database as last resort");
-            $db = new SQLite3(':memory:');
-            error_log("Successfully created in-memory database");
-        } catch (Exception $e) {
-            error_log("Failed to create in-memory database: " . $e->getMessage());
-            return false;
-        }
-    }
-    
-    // Create logs table if it doesn't exist.
-    $createLogsTableSQL = '
-        CREATE TABLE IF NOT EXISTS logs (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            log_text TEXT NOT NULL,
-            timestamp TEXT NOT NULL,
-            detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            is_suspicious INTEGER DEFAULT 0
-        )
-    ';
-    if (!$db->exec($createLogsTableSQL)) {
-        $errorMsg = $db->lastErrorMsg();
-        error_log("Failed to create logs table: " . $errorMsg);
-        // We continue anyway - the in-memory database should work
-    }
-    
-    // Create attack_detections table to store detected patterns
-    $createAttackDetectionsTableSQL = '
-        CREATE TABLE IF NOT EXISTS attack_detections (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            log_id INTEGER NOT NULL,
-            attack_type TEXT NOT NULL,
-            attack_details TEXT,
-            pattern TEXT,
-            FOREIGN KEY (log_id) REFERENCES logs(id)
-        )
-    ';
-    if (!$db->exec($createAttackDetectionsTableSQL)) {
-        $errorMsg = $db->lastErrorMsg();
-        error_log("Failed to create attack_detections table: " . $errorMsg);
-        // We continue anyway - the in-memory database should work
-    }
+    try {
+        // Make sure we have proper permissions
+        ensureDatabasePermissions($dbPath);
         
-    return $db;
+        // Connect to the database
+        $db = new SQLite3(
+            $dbPath,
+            SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE
+        );
+        
+        error_log("Successfully connected to database at: " . $dbPath);
+        
+        // Create logs table if it doesn't exist.
+        $createLogsTableSQL = '
+            CREATE TABLE IF NOT EXISTS logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                log_text TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                is_suspicious INTEGER DEFAULT 0
+            )
+        ';
+        if (!$db->exec($createLogsTableSQL)) {
+            $errorMsg = $db->lastErrorMsg();
+            error_log("Failed to create logs table: " . $errorMsg);
+            return null;
+        }
+        
+        // Create attack_detections table to store detected patterns
+        $createAttackDetectionsTableSQL = '
+            CREATE TABLE IF NOT EXISTS attack_detections (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                log_id INTEGER NOT NULL,
+                attack_type TEXT NOT NULL,
+                attack_details TEXT,
+                pattern TEXT,
+                FOREIGN KEY (log_id) REFERENCES logs(id)
+            )
+        ';
+        if (!$db->exec($createAttackDetectionsTableSQL)) {
+            $errorMsg = $db->lastErrorMsg();
+            error_log("Failed to create attack_detections table: " . $errorMsg);
+            return null;
+        }
+            
+        return $db;
+    } catch (Exception $e) {
+        error_log("Failed to connect to database: " . $e->getMessage());
+        return null;
+    }
 }
 
 // Main processing function
@@ -190,42 +154,11 @@ function processLogs($logs) {
         // Setup database
         $db = setupDatabase();
         if (!$db) {
-            // Try to use an in-memory database as a fallback
-            try {
-                error_log("Attempting to use in-memory SQLite database as fallback");
-                $db = new SQLite3(':memory:');
-                
-                // Create our tables in memory
-                $db->exec('
-                    CREATE TABLE logs (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        log_text TEXT NOT NULL,
-                        timestamp TEXT NOT NULL,
-                        detected_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        is_suspicious INTEGER DEFAULT 0
-                    )
-                ');
-                
-                $db->exec('
-                    CREATE TABLE attack_detections (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        log_id INTEGER NOT NULL,
-                        attack_type TEXT NOT NULL,
-                        attack_details TEXT,
-                        pattern TEXT,
-                        FOREIGN KEY (log_id) REFERENCES logs(id)
-                    )
-                ');
-                
-                error_log("Successfully created in-memory database as fallback");
-            } catch (Exception $e) {
-                error_log("Failed to create in-memory fallback database: " . $e->getMessage());
-                return [
-                    'success' => false,
-                    'error' => 'Failed to connect to database',
-                    'error_details' => 'Database connection error: ' . $e->getMessage()
-                ];
-            }
+            return [
+                'success' => false,
+                'error' => 'Failed to connect to database',
+                'error_details' => 'Could not connect to the logs.db database in the current directory'
+            ];
         }
         
         // Start a transaction for better performance
@@ -296,8 +229,8 @@ function processLogs($logs) {
                             VALUES (:log_id, :attack_type, :attack_details, :pattern)
                         ');
                         $attackStmt->bindValue(':log_id', $logId, SQLITE3_INTEGER);
-                        $attackStmt->bindValue(':attack_type', $patternInfo['attack_type'], SQLITE3_TEXT);
-                        $attackStmt->bindValue(':attack_details', $patternInfo['description'] ?? '', SQLITE3_TEXT);
+                        $attackStmt->bindValue(':attack_type', $patternInfo['attackType'], SQLITE3_TEXT);
+                        $attackStmt->bindValue(':attack_details', $patternInfo['attackDetails'] ?? '', SQLITE3_TEXT);
                         $attackStmt->bindValue(':pattern', $patternInfo['pattern'], SQLITE3_TEXT);
                         $attackStmt->execute();
                     }

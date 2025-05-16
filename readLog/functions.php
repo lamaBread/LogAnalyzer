@@ -4,28 +4,62 @@
 function aggregateLogs($logDir, $outputFile, $logRoot, $pattern) {
     if (!is_dir($logDir)) {
         //echo "Log directory not found: $logDir\n";
-        return;
+        return [];
     }
 
     $files = glob($logDir . $pattern);
     $output = "";
-
+    $newLogs = []; // 새 로그를 저장할 배열
+    
+    // 기존 파일 내용 읽기 (없으면 빈 문자열)
+    $previousContent = file_exists($outputFile) ? file_get_contents($outputFile) : "";
+    
     foreach ($files as $file) {
         $output .= "--- " . basename($file) . " ---\n";
+        
+        // 파일 내용 가져오기
+        $fileContent = "";
         if (substr($file, -3) === '.gz') {
-            $output .= gzfile_get_contents($file);  // 압축파일은 압축 풀고 병합.
+            $fileContent = gzfile_get_contents($file);
         } else {
-            $output .= file_get_contents($file);  //압축파일이 아니면 file_get_contents로 병합.
+            $fileContent = file_get_contents($file);
         }
+        
+        // 로그 라인별로 처리
+        $lines = explode("\n", $fileContent);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            // 빈 줄 건너뛰기
+            if ($line === '') continue;
+            
+            // 이 로그 행이 기존 출력 파일에 없으면 새 로그로 간주
+            if (strpos($previousContent, $line) === false) {
+                // 헤더 라인이 아닌 경우만 새 로그로 추가
+                if (strpos($line, '---') !== 0) {
+                    $newLogs[] = $line;
+                }
+            }
+        }
+        
+        $output .= $fileContent;
         $output .= "\n";
     }
 
-    // Write to the output file.
+    // 파일에 쓰기
     if (file_put_contents($outputFile, $output) !== false) {
         readLogs_log(true, $files, $logRoot);
     } else {
         readLogs_log(false, $files, $logRoot);
     }
+    
+    // 중복 제거 및 빈 줄 필터링
+    $newLogs = array_unique($newLogs);
+    $newLogs = array_filter($newLogs, function($line) {
+        return !empty(trim($line));
+    });
+    
+    // 식별된 새 로그 반환
+    return $newLogs;
 }
 
 function gzfile_get_contents($file) {
@@ -59,10 +93,6 @@ function monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot)
     $lastAccessModTime = [];
     $lastErrorModTime = [];
     
-    // 로그 처리 추적을 위한 변수
-    $processedAccessLines = 0;
-    $processedErrorLines = 0;
-    
     // 초기 파일 상태 기록
     $accessFiles = glob($accessPattern);
     $errorFiles = glob($errorPattern);
@@ -76,18 +106,17 @@ function monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot)
         $lastErrorFiles[] = $file;
         $lastErrorModTime[$file] = filemtime($file);
     }
+
+    // 초기 병합 실행 및 새 로그 수집
+    $initialAccessLogs = aggregateLogs($logDir, $outputFileAccess, $logRoot, '/access.log*');
+    $initialErrorLogs = aggregateLogs($logDir, $outputFileError, $logRoot, '/error.log*');
     
-    // 초기 병합 실행
-    aggregateLogs($logDir, $outputFileAccess, $logRoot, '/access.log*');
-    aggregateLogs($logDir, $outputFileError, $logRoot, '/error.log*');
-    
-    // 초기 처리된 라인 수 기록
-    if (file_exists($outputFileAccess)) {
-        $processedAccessLines = count(file($outputFileAccess));
-    }
-    
-    if (file_exists($outputFileError)) {
-        $processedErrorLines = count(file($outputFileError));
+    // 초기 로그 전송
+    $initialLogs = array_merge($initialAccessLogs, $initialErrorLogs);
+    if (!empty($initialLogs)) {
+        echo "Sending " . count($initialLogs) . " initial logs for evaluation...\n";
+        $result = sendLogsForEvaluation($initialLogs);
+        echo "Result: " . ($result ? "Success" : "Failed") . "\n";
     }
     
     echo "Initial log files processed. Monitoring for changes...\n";
@@ -132,63 +161,22 @@ function monitorLogFiles($logDir, $outputFileAccess, $outputFileError, $logRoot)
         if ($changed) {
             echo "Log file changes detected. Updating combined logs...\n";
             
-            // 병합 전 현재 라인 수 저장
-            $previousAccessLines = $processedAccessLines;
-            $previousErrorLines = $processedErrorLines;
+            // 로그 병합 및 새 로그 직접 식별
+            $newAccessLogs = aggregateLogs($logDir, $outputFileAccess, $logRoot, '/access.log*');
+            $newErrorLogs = aggregateLogs($logDir, $outputFileError, $logRoot, '/error.log*');
             
-            // 로그 병합
-            aggregateLogs($logDir, $outputFileAccess, $logRoot, '/access.log*');
-            aggregateLogs($logDir, $outputFileError, $logRoot, '/error.log*');
-            
-            // 새 로그 분석을 위한 로그 수 계산
-            $currentAccessLines = 0;
-            $currentErrorLines = 0;
-            
-            if (file_exists($outputFileAccess)) {
-                $currentAccessLines = count(file($outputFileAccess));
-            }
-            
-            if (file_exists($outputFileError)) {
-                $currentErrorLines = count(file($outputFileError));
-            }
-            
-            // 새 로그가 있는지 확인
-            $newAccessLogs = [];
-            $newErrorLogs = [];
-            
-            if ($currentAccessLines > $previousAccessLines) {
-                // 새 접근 로그 추출 및 전처리
-                $accessLogContents = file($outputFileAccess);
-                $newAccessLogs = array_slice($accessLogContents, $previousAccessLines);
-                $newAccessLogs = array_map('trim', $newAccessLogs); // 각 줄의 앞뒤 공백 제거
-                echo "Found " . count($newAccessLogs) . " new access log entries.\n";
-            }
-            
-            if ($currentErrorLines > $previousErrorLines) {
-                // 새 에러 로그 추출 및 전처리
-                $errorLogContents = file($outputFileError);
-                $newErrorLogs = array_slice($errorLogContents, $previousErrorLines);
-                $newErrorLogs = array_map('trim', $newErrorLogs); // 각 줄의 앞뒤 공백 제거
-                echo "Found " . count($newErrorLogs) . " new error log entries.\n";
-            }
-            
-            // 새 로그가 있으면 평가 API로 전송
+            // 새 로그 합치기
             $newLogs = array_merge($newAccessLogs, $newErrorLogs);
             
-            // 빈 줄 제거 (trim 후 빈 문자열인 요소 필터링)
-            $newLogs = array_filter($newLogs, function($line) {
-                return trim($line) !== '';
-            });
-            
+            // 새 로그가 있으면 평가 API로 전송
             if (!empty($newLogs)) {
-                echo "Sending " . count($newLogs) . " new logs for evaluation...\n";
-                echo "Result: " . sendLogsForEvaluation($newLogs) . "\n";
-                echo "Logs: " . print_r($newLogs, true) . "\n";
+                echo "Found " . count($newLogs) . " new log entries for evaluation.\n";
+                echo "Sending sample: " . print_r(array_slice($newLogs, 0, 3), true) . "...\n";
+                $result = sendLogsForEvaluation($newLogs);
+                echo "Result: " . ($result ? "Success" : "Failed") . "\n";
+            } else {
+                echo "No new logs to evaluate.\n";
             }
-            
-            // 처리된 라인 수 업데이트
-            $processedAccessLines = $currentAccessLines;
-            $processedErrorLines = $currentErrorLines;
         }
         
         // 짧은 간격으로 확인 (CPU 과부하 방지)

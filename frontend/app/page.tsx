@@ -37,7 +37,7 @@ export default function Page() {
   useEffect(() => {
     const fetchVisitorData = async () => {
       try {
-        const logFilePath = "./LOG/test_log"; // 로그 파일 경로 지정
+        const logFilePath = "./LOG/combine_access.log"; // 로그 파일 경로 지정
         
         const response = await fetch("http://localhost:8445/APIs/log_graph.php", {
           method: "POST",

@@ -31,16 +31,16 @@ $twentyFourHoursAgo = $currentTime - (24 * 60 * 60);
 $recentLogs = [];
 
 foreach ($logArray as $log) {
-    // Apache log format: [Day Mon DD HH:MM:SS.microseconds YYYY]
-    if (preg_match('/\[([A-Za-z]{3}) ([A-Za-z]{3}) (\d{1,2}) (\d{2}:\d{2}:\d{2})\.(\d+) (\d{4})\]/', $log, $matches)) {
-        $day = $matches[1];
+    // Access log format: [DD/Mon/YYYY:HH:MM:SS +ZZZZ]
+    if (preg_match('/\[(\d{1,2})\/([A-Za-z]{3})\/(\d{4}):(\d{2}:\d{2}:\d{2}) ([+-]\d{4})\]/', $log, $matches)) {
+        $date = $matches[1];
         $month = $matches[2];
-        $date = $matches[3];
+        $year = $matches[3];
         $time = $matches[4];
-        $year = $matches[6];
+        $timezone = $matches[5];
         
         // Construct timestamp string
-        $timestampStr = "$day $month $date $time $year";
+        $timestampStr = "$date $month $year $time $timezone";
         // Parse the timestamp
         $timestamp = strtotime($timestampStr);
         
