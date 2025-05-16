@@ -89,8 +89,39 @@ function getAttackDetections($db, $logId) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="refresh" content="5">
     <title>Log Analyzer - Logs</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        function initializeDatabase() {
+            if (confirm('Are you sure you want to initialize the database? This will delete all existing logs.')) {
+                // Show loading message
+                document.getElementById('initStatus').textContent = 'Initializing database...';
+                document.getElementById('initStatus').style.display = 'block';
+                
+                fetch('initialize_db.php', {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('initStatus').textContent = 'Database initialized successfully! Reloading page...';
+                        document.getElementById('initStatus').className = 'success-message';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
+                    } else {
+                        document.getElementById('initStatus').textContent = 'Error: ' + data.error + (data.error_details ? ' - ' + data.error_details : '');
+                        document.getElementById('initStatus').className = 'error-message';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('initStatus').textContent = 'Error: ' + error;
+                    document.getElementById('initStatus').className = 'error-message';
+                });
+            }
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -119,6 +150,10 @@ function getAttackDetections($db, $logId) {
                 ?>
                 <span class="label">Suspicious Logs:</span> 
                 <span class="value"><?php echo number_format($suspiciousCount); ?> (<?php echo $suspiciousPercentage; ?>%)</span>
+            </div>
+            <div class="summary-item">
+                <button class="init-db-btn" onclick="initializeDatabase()">Initialize Database</button>
+                <div id="initStatus" style="display:none;"></div>
             </div>
         </div>
         
