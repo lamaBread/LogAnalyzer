@@ -27,6 +27,14 @@ function readAttackRegexPatterns() {
                     $pattern = $data[2];
                     $pattern = trim($pattern, '"');
                     
+                    // Basic pattern validation: check for balanced brackets/parentheses
+                    if (substr_count($pattern, '{') != substr_count($pattern, '}') ||
+                        substr_count($pattern, '[') != substr_count($pattern, ']') ||
+                        substr_count($pattern, '(') != substr_count($pattern, ')')) {
+                        error_log("Skipping malformed regex pattern: " . $pattern);
+                        continue;
+                    }
+                    
                     // Store pattern with its attack type and details
                     $patterns[] = [
                         'attackType' => $currentAttackType,
@@ -54,6 +62,14 @@ function readAttackRegexPatterns() {
 function formatRegexPattern($pattern) {
     // If pattern is empty, return false
     if (empty($pattern)) {
+        return false;
+    }
+    
+    // Additional check for malformed regex patterns
+    if (substr_count($pattern, '{') != substr_count($pattern, '}') || 
+        substr_count($pattern, '(') != substr_count($pattern, ')') ||
+        substr_count($pattern, '[') != substr_count($pattern, ']')) {
+        error_log("Malformed regex pattern (unbalanced brackets/parentheses): " . $pattern);
         return false;
     }
     
@@ -378,12 +394,21 @@ function isLogSuspiciousFullScan($logEntry, $patterns) {
             }
             
             // 패턴 매칭 시도
-            $isMatch = @preg_match($formattedPattern, $logEntry);
+            try {
+                $isMatch = @preg_match($formattedPattern, $logEntry);
+            } catch (Throwable $e) {
+                if (!isset($failedPatterns[$pattern])) {
+                    error_log("Exception during preg_match with pattern: " . $pattern . " - " . $e->getMessage());
+                    $failedPatterns[$pattern] = true;
+                }
+                continue;
+            }
             
             // 오류 처리
             if ($isMatch === false) {
                 if (!isset($failedPatterns[$pattern])) {
-                    error_log("Error with pattern: " . $pattern);
+                    $errorMessage = preg_last_error_msg();
+                    error_log("Error with pattern: " . $pattern . " - " . $errorMessage);
                     $failedPatterns[$pattern] = true;
                 }
                 continue;
