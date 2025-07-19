@@ -7,48 +7,71 @@ import { getLogs } from "@/app/lib/getLogs";
 import { marked } from "marked";
 import '../../../styles/markdown.css';
 
+// 공통 함수들 (파일 분리 없이 이 파일 최상단에 둠)
+async function fetchFilteredLogs(prefix: string) {
+  try {
+    const logs = await getLogs("statusCode");
+    return Object.keys(logs)
+      .filter((key) => key.startsWith(prefix))
+      .flatMap((key) => logs[key]);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return [];
+  }
+}
+
+function useLoadingSymbol(
+  loading: boolean,
+  setLoadingSymbol: React.Dispatch<React.SetStateAction<string>>
+) {
+  React.useEffect(() => {
+    if (!loading) return;
+
+    const symbols = [".", "..", "...", ""];
+    let index = 0;
+    const interval = setInterval(() => {
+      setLoadingSymbol(symbols[index]);
+      index = (index + 1) % symbols.length;
+    }, 500);
+
+    return () => clearInterval(interval);
+  }, [loading, setLoadingSymbol]);
+}
+
+async function analyzeLogs(
+  logs: string[],
+  prompt: string,
+  reportRef: React.RefObject<HTMLDivElement>
+) {
+  await fetchLogsAndGenerateReport(logs, prompt, reportRef);
+  if (reportRef.current) {
+    reportRef.current.innerHTML = await marked(reportRef.current.innerHTML);
+  }
+}
+
 export default function Code300Page() {
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingSymbol, setLoadingSymbol] = useState(".");
   const [logs, setLogs] = useState<string[]>([]);
-  const [loadingSymbol, setLoadingSymbol] = useState<string>('.');
   const reportRef = useRef<HTMLDivElement>(null);
-  const leadingPrompt = "Analyze the logs with status codes ranging from 300 to 399 and generate a security report about the server status within 100 words. ";
+
+  const leadingPrompt =
+    "Analyze the logs with status codes ranging from 300 to 399 and generate a security report about the server status within 100 words.";
 
   useEffect(() => {
     async function fetchData() {
-      try {
-        const logs = await getLogs('statusCode');
-        const filteredLogs = Object.keys(logs)
-          .filter(key => key.startsWith('3'))
-          .flatMap(key => logs[key]);
-        setLogs(filteredLogs);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+      const filteredLogs = await fetchFilteredLogs("3");
+      setLogs(filteredLogs);
     }
-
     fetchData();
   }, []);
 
-  useEffect(() => {
-    if (loading) {
-      const symbols = ['.', '..', '...', ''];
-      let index = 0;
-      const interval = setInterval(() => {
-        setLoadingSymbol(symbols[index]);
-        index = (index + 1) % symbols.length;
-      }, 500);
-      return () => clearInterval(interval);
-    }
-  }, [loading]);
+  useLoadingSymbol(loading, setLoadingSymbol);
 
   async function handleAnalyze() {
     setLoading(true);
-    await fetchLogsAndGenerateReport(logs, leadingPrompt, reportRef);
+    await analyzeLogs(logs, leadingPrompt, reportRef);
     setLoading(false);
-    if (reportRef.current) {
-      reportRef.current.innerHTML = await marked(reportRef.current.innerHTML);
-    }
   }
 
   return (
@@ -56,19 +79,17 @@ export default function Code300Page() {
       <StatusLayout>
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold">Status Code 300-399</h1>
-          <button onClick={handleAnalyze} className="p-2 bg-gray-500 text-white rounded">
-            {!loading && <span>Analyze</span>}
-            {loading && <span>Loading{loadingSymbol}</span>}
+          <button
+            onClick={handleAnalyze}
+            className="p-2 bg-gray-500 text-white rounded"
+          >
+            {!loading ? "Analyze" : `Loading${loadingSymbol}`}
           </button>
         </div>
-        <div ref={reportRef} className="mb-4 markdown-container"></div>
+        <div ref={reportRef} className="mb-4 markdown-container" />
       </StatusLayout>
       {logs.length > 0 ? (
-        <div>
-          {logs.map((log, index) => (
-            <div key={index}>{log}</div>
-          ))}
-        </div>
+        logs.map((log, idx) => <div key={idx}>{log}</div>)
       ) : (
         <p>No result...</p>
       )}

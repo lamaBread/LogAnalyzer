@@ -3,14 +3,15 @@
 import React, { useState } from "react";
 
 export default function SearchPage() {
-  const [query, setQuery] = useState<string>("");
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<string[]>([]);
   const [history, setHistory] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // 검색 실행 함수
   const handleSearch = async () => {
-    if (!query.trim() || query.length < 1) {
+    if (!query.trim()) {
       setError("검색어를 입력하세요.");
       return;
     }
@@ -21,26 +22,23 @@ export default function SearchPage() {
     try {
       const response = await fetch("http://localhost:8445/APIs/searchLogs.php", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `question=${encodeURIComponent(query)}`,
       });
 
       if (!response.ok) {
         throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
       }
-      
-      const responseText = await response.text();
-      console.log("Response Text:", responseText);
-  
-      const data = JSON.parse(responseText);
-      
-      setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]);
 
+      const responseText = await response.text();
+      const data = JSON.parse(responseText);
+
+      setResults(Array.isArray(data) && data.length > 0 ? data : ["검색 결과가 없습니다."]);
+
+      // 검색 기록 관리 (중복 제거, 최대 10개 유지)
       setHistory((prev) => {
-        const updatedHistory = [query, ...prev.filter((item) => item !== query)].slice(0, 10);
-        return updatedHistory;
+        const filtered = prev.filter((item) => item !== query);
+        return [query, ...filtered].slice(0, 10);
       });
     } catch (err) {
       console.error("검색 중 오류 발생:", err);
@@ -50,10 +48,12 @@ export default function SearchPage() {
     }
   };
 
+  // 검색 기록 삭제
   const handleDeleteHistory = (index: number) => {
     setHistory((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // 엔터키로 검색 실행
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch();
@@ -64,6 +64,7 @@ export default function SearchPage() {
     <div className="flex flex-col h-screen p-4">
       <h1 className="text-3xl font-bold mb-4">Log Search</h1>
 
+      {/* 검색 입력 및 버튼 */}
       <div className="flex mb-4">
         <input
           type="text"
@@ -81,13 +82,17 @@ export default function SearchPage() {
         </button>
       </div>
 
+      {/* 로딩 및 에러 메시지 */}
       {loading && <p>로딩 중...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
       {/* 검색 결과 */}
-      <div className="mt-6">
+      <section className="mt-6">
         <h2 className="text-2xl font-bold mb-2">검색 결과</h2>
-        <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
+        <div
+          className="overflow-y-auto border border-gray-400 rounded-md"
+          style={{ maxHeight: 500 }}
+        >
           {results.length > 0 ? (
             <table className="table-auto w-full border-collapse text-xl">
               <tbody>
@@ -105,15 +110,18 @@ export default function SearchPage() {
             <p className="p-4">검색 결과가 없습니다.</p>
           )}
         </div>
-      </div>
+      </section>
 
       {/* 검색 기록 */}
       {history.length > 0 && (
-        <div className="mt-6">
+        <section className="mt-6">
           <h2 className="text-2xl font-bold mb-2">검색 기록</h2>
           <ul className="text-lg">
             {history.map((item, index) => (
-              <li key={index} className="flex justify-between items-center border-b py-2">
+              <li
+                key={index}
+                className="flex justify-between items-center border-b py-2"
+              >
                 <span>{item}</span>
                 <button
                   onClick={() => handleDeleteHistory(index)}
@@ -124,7 +132,7 @@ export default function SearchPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       )}
     </div>
   );
