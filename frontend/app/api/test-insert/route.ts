@@ -10,10 +10,8 @@ export async function GET() {
     );
 
     return NextResponse.json({ success: true, insertedId: result.insertId });
-  } catch (err) {
-    if (err instanceof Error) {
-      return NextResponse.json({ success: false, error: err.message });
-    }
-    return NextResponse.json({ success: false, error: "Unknown error" });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ success: false, error: message });
   }
 }
