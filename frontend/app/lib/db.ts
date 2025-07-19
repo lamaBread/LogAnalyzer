@@ -1,11 +1,11 @@
 import mysql from "mysql2/promise";
-import { RowDataPacket } from 'mysql2';
+import { RowDataPacket } from "mysql2";
 
 const pool = mysql.createPool({
-  host: 'mysql',
-  user: 'root',
-  password: 'rootpw',
-  database: 'conversations',
+  host: "mysql",
+  user: "root",
+  password: "rootpw",
+  database: "conversations",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -13,11 +13,11 @@ const pool = mysql.createPool({
 
 export const getConversations = async (): Promise<RowDataPacket[]> => {
   try {
-    const [rows] = await pool.query('SELECT * FROM conversation ORDER BY created_at DESC');
+    const [rows] = await pool.query("SELECT * FROM conversation ORDER BY created_at DESC");
     return rows as RowDataPacket[];
   } catch (err) {
     console.error("Error fetching conversations:", err);
-    throw new Error('대화 기록을 가져오는 데 실패했습니다.');
+    throw new Error("대화 기록을 가져오는 데 실패했습니다.");
   }
 };
 
@@ -32,7 +32,7 @@ export const getConversationsWithContext = async (): Promise<any[]> => {
     return rows as RowDataPacket[];
   } catch (err) {
     console.error("Error fetching conversations with context:", err);
-    throw new Error('대화 기록 및 관련 컨텍스트를 가져오는 데 실패했습니다.');
+    throw new Error("대화 기록 및 관련 컨텍스트를 가져오는 데 실패했습니다.");
   }
 };
 
@@ -43,7 +43,7 @@ export const query = async (sql: string, values?: any) => {
     return rows;
   } catch (err) {
     console.error("Error executing query:", err);
-    throw new Error('쿼리 실행 중 오류가 발생했습니다.');
+    throw new Error("쿼리 실행 중 오류가 발생했습니다.");
   }
 };
 

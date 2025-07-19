@@ -33,7 +33,8 @@ export default function DarkModeToggle() {
   return (
     <button
       onClick={toggleDarkMode}
-      className="px-2 py-2 bg-white-500 text-white rounded hover:bg-gray-600 transition-colors"
+      className="px-2 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+      aria-label="Toggle Dark Mode"
     >
       {theme === "light" ? "🌙" : "☀"}
     </button>

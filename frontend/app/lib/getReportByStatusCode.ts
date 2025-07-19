@@ -1,11 +1,15 @@
 import { queryLLM } from "@/app/lib/queryLLM";
 
-export async function fetchLogsAndGenerateReport(logs: string[], leadingPrompt: string, reportRef: React.RefObject<HTMLDivElement>) {
+export async function fetchLogsAndGenerateReport(
+  logs: string[],
+  leadingPrompt: string,
+  reportRef: React.RefObject<HTMLDivElement>
+) {
   try {
-    const userPrompt = `${leadingPrompt}\n${logs.join('\n')}`;
-    if (reportRef.current) {
-      reportRef.current.innerHTML = '';
-    }
+    const userPrompt = `${leadingPrompt}\n${logs.join("\n")}`;
+
+    if (reportRef.current) reportRef.current.innerHTML = "";
+
     for await (const { response } of queryLLM(userPrompt)) {
       if (reportRef.current) {
         reportRef.current.innerHTML += response;

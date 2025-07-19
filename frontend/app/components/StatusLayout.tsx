@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 export default function StatusLayout({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname(); 
+  const pathname = usePathname();
 
   const links = [
     { href: "/specific/main_menu/code_100", label: "Code 100" },
@@ -18,7 +18,7 @@ export default function StatusLayout({ children }: { children: React.ReactNode }
   return (
     <div className="p-4">
       {/* 상단 링크 영역 */}
-      <div className="flex space-x-10 mb-4 border-b pb-2">
+      <nav className="flex space-x-10 mb-4 border-b pb-2" aria-label="Status Codes Navigation">
         {links.map((link) => (
           <Link
             key={link.href}
@@ -26,13 +26,14 @@ export default function StatusLayout({ children }: { children: React.ReactNode }
             className={`text-black hover:underline dark:text-white ${
               pathname === link.href ? "font-bold text-xl" : ""
             }`}
+            aria-current={pathname === link.href ? "page" : undefined}
           >
             {link.label}
           </Link>
         ))}
-      </div>
+      </nav>
       {/* 페이지 컨텐츠 영역 */}
-      <div>{children}</div>
+      <main>{children}</main>
     </div>
   );
 }

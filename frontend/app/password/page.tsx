@@ -17,8 +17,9 @@ export default function PasswordPage() {
     return () => darkModeMediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const res = await fetch("/api/verify-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -26,6 +27,7 @@ export default function PasswordPage() {
     });
 
     const data = await res.json();
+
     if (data.success) {
       document.cookie = "password_verified=true; path=/";
       window.location.href = "/";
