@@ -1,33 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function PasswordPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [isDarkMode, setIsDarkMode] = useState(false);
-
-  useEffect(() => {
-    const darkModeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    setIsDarkMode(darkModeMediaQuery.matches);
-
-    const handleChange = (e: MediaQueryListEvent) => setIsDarkMode(e.matches);
-    darkModeMediaQuery.addEventListener("change", handleChange);
-
-    return () => darkModeMediaQuery.removeEventListener("change", handleChange);
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const res = await fetch("/api/verify-password", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ password }),
     });
-
     const data = await res.json();
-
     if (data.success) {
       document.cookie = "password_verified=true; path=/";
       window.location.href = "/";
@@ -37,7 +23,7 @@ export default function PasswordPage() {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-screen h-screen flex justify-center items-center bg-gray-200 dark:bg-gray-900 text-black dark:text-white">
+    <div className="fixed inset-0 flex justify-center items-center bg-gray-200 dark:bg-gray-900 text-black dark:text-white">
       <form onSubmit={handleSubmit} className="text-center">
         <h2 className="text-lg font-semibold mb-4">비밀번호 입력</h2>
         <input
