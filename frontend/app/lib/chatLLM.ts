@@ -1,7 +1,3 @@
-// messages 배열을 받아서 LLM에게 채팅을 시키고, 그 결과를 스트림으로 받아오는 함수
-// role <-- [ user: 사용자의 입력 / assistant: LLM의 출력  ]
-// content <- 사용자의 입력 / LLM의 출력
-
 export async function* chatLLM(messages: Array<{ role: string, content: string }>, model: string = 'llama3.2:1b') {
   try {
     const response = await fetch(`http://127.0.0.1:11434/api/chat`, {
@@ -37,7 +33,7 @@ export async function* chatLLM(messages: Array<{ role: string, content: string }
         if (chunk.trim()) {
           try {
             const json = JSON.parse(chunk);
-            yield json; // Pass through the entire response object
+            yield json;
           } catch (e) {
             console.error('Failed to parse JSON chunk:', e);
           }

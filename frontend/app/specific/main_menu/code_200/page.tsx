@@ -17,7 +17,7 @@ export default function Code200Page() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const logs = await getLogs('statusCode');  // 배열이 반환됨.
+        const logs = await getLogs('statusCode');
         const filteredLogs = Object.keys(logs)
           .filter(key => key.startsWith('2'))
           .flatMap(key => logs[key]);
@@ -47,7 +47,7 @@ export default function Code200Page() {
     await fetchLogsAndGenerateReport(logs, leadingPrompt, reportRef);
     setLoading(false);
     if (reportRef.current) {
-      reportRef.current.innerHTML = await marked(reportRef.current.innerHTML);  // LLM 응답 종료 이후, 마크다운으로 변환하여 삽입.
+      reportRef.current.innerHTML = await marked(reportRef.current.innerHTML);
     }
   }
 

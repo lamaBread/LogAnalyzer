@@ -28,7 +28,7 @@ export default function PasswordPage() {
     const data = await res.json();
     if (data.success) {
       document.cookie = "password_verified=true; path=/";
-      window.location.href = "/"; // 메인 페이지로 이동
+      window.location.href = "/";
     } else {
       setError("비밀번호가 일치하지 않습니다...");
     }

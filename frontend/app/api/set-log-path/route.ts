@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/app/lib/db"; // MySQL 연결
+import db from "@/app/lib/db";
 
 export async function POST(req: Request) {
   try {

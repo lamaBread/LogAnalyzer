@@ -6,7 +6,6 @@ import { marked } from "marked";
 import "./styles/markdown.css";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-// 방문자 데이터 타입
 type VisitorData = {
   time: string;
   count: number;
@@ -20,7 +19,6 @@ export default function Page() {
   const [maxCount, setMaxCount] = useState<number>(10);
   const [totalLogs, setTotalLogs] = useState<number>(0);
 
-  // 로딩 중 기호 순환
   useEffect(() => {
     if (loading) {
       const symbols = [".", "..", "...", ""];
@@ -33,11 +31,10 @@ export default function Page() {
     }
   }, [loading]);
 
-  // 방문자 데이터 가져오기
   useEffect(() => {
     const fetchVisitorData = async () => {
       try {
-        const logFilePath = "./LOG/combine_access.log"; // 로그 파일 경로 지정
+        const logFilePath = "./LOG/combine_access.log";
         
         const response = await fetch("http://localhost:8445/APIs/log_graph.php", {
           method: "POST",
@@ -52,12 +49,10 @@ export default function Page() {
         if (result.error) {
           throw new Error(result.error);
         }
-        
-        // 새로운 응답 형식 처리
+   
         setVisitorData(result.data);
         setTotalLogs(result.total);
-        
-        // 최대값 계산
+
         const counts = result.data.map((item: VisitorData) => item.count);
         setMaxCount(Math.max(...counts, 10));
       } catch (error) {
@@ -68,11 +63,10 @@ export default function Page() {
     fetchVisitorData();
   }, []);
 
-  // 페이지 데이터 요청 함수
   const fetchPageData = async () => {
     setLoading(true);
     try {
-      const logFilePath = "./LOG/test_log_access";  // 이곳에서는 test_log_access 로그 파일을 사용합니다. (LLM 입력 로그 수 제한 필요.)
+      const logFilePath = "./LOG/test_log_access";
       const logArrayResponse = await fetch("http://localhost:8445/APIs/log_array.php", {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -112,11 +106,11 @@ export default function Page() {
             <XAxis
               dataKey="time"
               tickFormatter={(tick: any) => String(tick)}
-              interval={Math.max(1, Math.floor(visitorData.length / 12))} // 표시되는 간격 조정
+              interval={Math.max(1, Math.floor(visitorData.length / 12))}
             />
             <YAxis domain={[0, maxCount > 0 ? maxCount : 10]} />
             <Tooltip />
-            <Line type="monotone" dataKey="count" stroke="#8884d8" dot={false} /> {/* 점 표시 활성화 여부 */}
+            <Line type="monotone" dataKey="count" stroke="#8884d8" dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>

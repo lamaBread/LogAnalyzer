@@ -1,11 +1,10 @@
 import { getLogs } from './getLogs';
 
-// 중복 연산을 피하기 위한 전역변수.
 export let sortedLogs: { normal_access: string, probable_attack: string, suspicious_activity: string } | null = null;
 
 export async function sortLogsByRisk() {
   try {
-    const logs = await getLogs('classifying'); // 가공되지 않은 모든 로그를 가져옴
+    const logs = await getLogs('classifying');
     const userPrompt = `Classify the following logs into three categories: normal_access, probable_attack, and suspicious_activity. Ensure each log is assigned to only one category.
 
     - normal_access: Logs that are considered safe access.

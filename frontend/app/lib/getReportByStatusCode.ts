@@ -4,7 +4,7 @@ export async function fetchLogsAndGenerateReport(logs: string[], leadingPrompt: 
   try {
     const userPrompt = `${leadingPrompt}\n${logs.join('\n')}`;
     if (reportRef.current) {
-      reportRef.current.innerHTML = ''; // Clear previous content
+      reportRef.current.innerHTML = '';
     }
     for await (const { response } of queryLLM(userPrompt)) {
       if (reportRef.current) {

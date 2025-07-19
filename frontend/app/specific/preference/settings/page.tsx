@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { useTheme } from "../../../context/ThemeContext"; // ThemeContext에서 useTheme 가져오기
-import DarkModeToggle from "../../../components/darkmodetoggle"; // 경로를 실제 경로로 수정
+import { useTheme } from "../../../context/ThemeContext";
+import DarkModeToggle from "../../../components/darkmodetoggle";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme(); // useTheme 훅을 사용하여 테마 상태 관리
+  const { theme, setTheme } = useTheme();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [font, setFont] = useState("sans-serif");
@@ -13,7 +13,6 @@ export default function SettingsPage() {
   const [logPath, setLogPath] = useState("");
   const [reportEmail, setReportEmail] = useState("");
 
-  // 비밀번호 변경 처리 함수
   const handleChangePassword = async () => {
     const res = await fetch("/api/change-password", {
       method: "POST",
@@ -30,7 +29,6 @@ export default function SettingsPage() {
     }
   };
 
-  // 로그 파일 경로 저장 함수
   const handleLogPathSave = async () => {
     const res = await fetch("/api/set-log-path", {
       method: "POST",
@@ -45,7 +43,6 @@ export default function SettingsPage() {
     }
   };
 
-  // 보고서 받을 이메일 저장 함수
   const handleReportEmailSave = async () => {
     const res = await fetch("https://your-api-endpoint.com/save-email.php", {
       method: "POST",

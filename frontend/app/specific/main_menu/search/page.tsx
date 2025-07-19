@@ -3,11 +3,11 @@
 import React, { useState } from "react";
 
 export default function SearchPage() {
-  const [query, setQuery] = useState<string>(""); // 검색어 상태
-  const [results, setResults] = useState<string[]>([]); // 검색 결과 상태
-  const [history, setHistory] = useState<string[]>([]); // 검색 기록 (최대 10개)
-  const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
-  const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
+  const [query, setQuery] = useState<string>("");
+  const [results, setResults] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async () => {
     if (!query.trim() || query.length < 1) {
@@ -32,13 +32,12 @@ export default function SearchPage() {
       }
       
       const responseText = await response.text();
-      console.log("Response Text:", responseText); // Log the response text
+      console.log("Response Text:", responseText);
   
       const data = JSON.parse(responseText);
       
       setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]);
 
-      // 검색 기록 추가 (최대 10개 유지)
       setHistory((prev) => {
         const updatedHistory = [query, ...prev.filter((item) => item !== query)].slice(0, 10);
         return updatedHistory;
