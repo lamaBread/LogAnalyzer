@@ -9,8 +9,6 @@ export default function SuspiciousActivity() {
   const [error, setError] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"score" | "ip" | "totalLogs" | "suspiciousCount">("score");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-
-  // 로그 분석 요청 함수
   const analyzeLogs = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -39,7 +37,6 @@ export default function SuspiciousActivity() {
     }
   };
 
-  // 정렬된 IP 데이터 반환
   const getSortedIPs = () => {
     if (!suspicionData) return [];
 
@@ -56,7 +53,6 @@ export default function SuspiciousActivity() {
       .map(([ip, data]) => ({ ip, ...data }));
   };
 
-  // 테이블 헤더 클릭 시 정렬 기준 및 방향 변경
   const handleSort = (field: typeof sortBy) => {
     if (sortBy === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
@@ -66,14 +62,12 @@ export default function SuspiciousActivity() {
     }
   };
 
-  // 점수에 따른 색상 클래스 지정
   const getSeverityClass = (score: number) => {
     if (score >= 0.8) return "bg-red-100 border-red-500 text-red-700";
     if (score >= 0.4) return "bg-yellow-100 border-yellow-500 text-yellow-700";
     return "bg-green-100 border-green-500 text-green-700";
   };
 
-  // 점수에 따른 아이콘 지정
   const getSeverityIcon = (score: number) => {
     if (score >= 0.8) return <span className="text-red-500 mr-2 font-bold">🔴</span>;
     if (score >= 0.4) return <span className="text-yellow-500 mr-2 font-bold">🟡</span>;
@@ -83,8 +77,6 @@ export default function SuspiciousActivity() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Suspicious Activity Analysis</h1>
-
-      {/* 분석 폼 */}
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Analyze Log File</h2>
         <form onSubmit={analyzeLogs} className="flex flex-col md:flex-row gap-4">
@@ -106,7 +98,6 @@ export default function SuspiciousActivity() {
         </form>
       </div>
 
-      {/* 에러 메시지 */}
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
           <strong className="font-bold">Error: </strong>
@@ -114,7 +105,6 @@ export default function SuspiciousActivity() {
         </div>
       )}
 
-      {/* 로딩 상태 */}
       {isLoading && (
         <div className="text-center p-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
@@ -122,7 +112,6 @@ export default function SuspiciousActivity() {
         </div>
       )}
 
-      {/* 분석 결과 */}
       {suspicionData && !isLoading && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>

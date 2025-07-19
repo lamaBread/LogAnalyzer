@@ -13,7 +13,6 @@ export default function SettingsPage() {
   const [fontSize, setFontSize] = useState("16px");
   const [logPath, setLogPath] = useState("");
   const [reportEmail, setReportEmail] = useState("");
-
   const handleChangePassword = async () => {
     try {
       const res = await fetch("/api/change-password", {
@@ -69,7 +68,6 @@ export default function SettingsPage() {
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">설정</h1>
 
-      {/* 비밀번호 변경 */}
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">비밀번호 변경</h2>
         <input
@@ -94,13 +92,11 @@ export default function SettingsPage() {
         </button>
       </section>
 
-      {/* 화면 테마 */}
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">화면 테마</h2>
         <DarkModeToggle />
       </section>
 
-      {/* 글꼴 및 글씨 크기 설정 */}
       <section className="flex space-x-4">
         <div className="space-y-2 w-1/2">
           <h2 className="text-lg font-semibold">글꼴 설정</h2>
@@ -130,7 +126,6 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      {/* 로그 파일 경로 */}
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">로그 파일 경로</h2>
         <input
@@ -148,7 +143,6 @@ export default function SettingsPage() {
         </button>
       </section>
 
-      {/* 보고서 받을 이메일 */}
       <section className="space-y-2">
         <h2 className="text-lg font-semibold">보고서 받을 이메일</h2>
         <input

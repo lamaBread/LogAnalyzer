@@ -7,7 +7,7 @@ import { getLogs } from "@/app/lib/getLogs";
 import { marked } from "marked";
 import '../../../styles/markdown.css';
 
-// 공통 함수들 (파일 분리 없이 각 페이지 상단에 둠)
+
 async function fetchFilteredLogs(prefix: string) {
   try {
     const logs = await getLogs("statusCode");

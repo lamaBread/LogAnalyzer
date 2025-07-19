@@ -9,7 +9,6 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // 검색 실행 함수
   const handleSearch = async () => {
     if (!query.trim()) {
       setError("검색어를 입력하세요.");
@@ -34,8 +33,6 @@ export default function SearchPage() {
       const data = JSON.parse(responseText);
 
       setResults(Array.isArray(data) && data.length > 0 ? data : ["검색 결과가 없습니다."]);
-
-      // 검색 기록 관리 (중복 제거, 최대 10개 유지)
       setHistory((prev) => {
         const filtered = prev.filter((item) => item !== query);
         return [query, ...filtered].slice(0, 10);
@@ -48,12 +45,10 @@ export default function SearchPage() {
     }
   };
 
-  // 검색 기록 삭제
   const handleDeleteHistory = (index: number) => {
     setHistory((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // 엔터키로 검색 실행
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSearch();
@@ -64,7 +59,6 @@ export default function SearchPage() {
     <div className="flex flex-col h-screen p-4">
       <h1 className="text-3xl font-bold mb-4">Log Search</h1>
 
-      {/* 검색 입력 및 버튼 */}
       <div className="flex mb-4">
         <input
           type="text"
@@ -82,11 +76,9 @@ export default function SearchPage() {
         </button>
       </div>
 
-      {/* 로딩 및 에러 메시지 */}
       {loading && <p>로딩 중...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* 검색 결과 */}
       <section className="mt-6">
         <h2 className="text-2xl font-bold mb-2">검색 결과</h2>
         <div
@@ -112,7 +104,6 @@ export default function SearchPage() {
         </div>
       </section>
 
-      {/* 검색 기록 */}
       {history.length > 0 && (
         <section className="mt-6">
           <h2 className="text-2xl font-bold mb-2">검색 기록</h2>
