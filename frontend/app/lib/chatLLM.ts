@@ -1,52 +1,43 @@
-// messages 배열을 받아서 LLM에게 채팅을 시키고, 그 결과를 스트림으로 받아오는 함수
-// role <-- [ user: 사용자의 입력 / assistant: LLM의 출력  ]
-// content <- 사용자의 입력 / LLM의 출력
-
-export async function* chatLLM(messages: Array<{ role: string, content: string }>, model: string = 'llama3.2:1b') {
+export async function* chatLLM(
+  messages: Array<{ role: string; content: string }>,
+  model: string = "llama3.2:1b"
+) {
   try {
     const response = await fetch(`http://127.0.0.1:11434/api/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: model,
-        messages: messages,
-        stream: true,
-      }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model, messages, stream: true }),
     });
 
-    if (!response.body) {
-      throw new Error('No response body');
-    }
+    if (!response.body) throw new Error("No response body");
 
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
     let done = false;
-    let buffer = '';
+    let buffer = "";
 
     while (!done) {
       const { value, done: readerDone } = await reader.read();
       done = readerDone;
       buffer += decoder.decode(value, { stream: true });
 
-      let boundary = buffer.indexOf('\n');
+      let boundary = buffer.indexOf("\n");
       while (boundary !== -1) {
         const chunk = buffer.slice(0, boundary);
         buffer = buffer.slice(boundary + 1);
         if (chunk.trim()) {
           try {
             const json = JSON.parse(chunk);
-            yield json; // Pass through the entire response object
+            yield json;
           } catch (e) {
-            console.error('Failed to parse JSON chunk:', e);
+            console.error("Failed to parse JSON chunk:", e);
           }
         }
-        boundary = buffer.indexOf('\n');
+        boundary = buffer.indexOf("\n");
       }
     }
   } catch (error) {
-    console.error('Failed to fetch data:', error);
+    console.error("Failed to fetch data:", error);
     throw error;
   }
 }

@@ -4,16 +4,16 @@ import React, { useState, useEffect } from "react";
 import { chatLLM } from "../../../lib/chatLLM";
 
 interface HistoryItem {
-  role: "user" | "assistant";  // 사용자 또는 AI 응답 구분
-  content: string;            // 실제 메시지 내용
+  role: "user" | "assistant";
+  content: string;
 }
 
 export default function AISearchPage() {
-  const [history, setHistory] = useState<HistoryItem[]>([]); // 전체 대화 내역을 저장
-  const [query, setQuery] = useState<string>(""); // 사용자가 입력하는 현재 질문을 저장
-  const [error, setError] = useState<string | null>(null); // 에러 상태 관리
-  const [loading, setLoading] = useState<boolean>(false); // (API 요청 중임을 나타내는) 로딩 상태 관리
-  const [currentResponse, setCurrentResponse] = useState<string>(""); // 현재 스트리밍되고 있는 AI 응답을 저장
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [query, setQuery] = useState<string>("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [currentResponse, setCurrentResponse] = useState<string>("");
 
   const handleSearch = async () => {
     if (!query.trim()) {
@@ -30,14 +30,13 @@ export default function AISearchPage() {
     setHistory(updatedHistory);
 
     try {
-      let fullResponse = "";  // AI 응답을 누적하여 저장할 변수
-      for await (const chunk of chatLLM(updatedHistory)) {  // 스트리밍으로 들어오는 응답을 실시간으로 화면에 표시
+      let fullResponse = "";
+      for await (const chunk of chatLLM(updatedHistory)) {
         if (chunk.message?.content) {
           fullResponse += chunk.message.content;
           setCurrentResponse(fullResponse);
         }
-        
-        // 응답이 완료되면 전체 대화 기록에 추가
+      
         if (chunk.done) {
           setHistory(prev => [...prev, { 
             role: "assistant", 
@@ -64,7 +63,7 @@ export default function AISearchPage() {
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-grow">
-        {/* 검색 기록 */}
+
         <div className="w-1/4 p-4 border-r border-gray-300 dark:border-gray-700">
           <h2 className="text-2xl font-bold mb-4">검색 기록</h2>
           <div className="overflow-y-auto" style={{ maxHeight: "500px" }}>
@@ -86,7 +85,6 @@ export default function AISearchPage() {
           </div>
         </div>
 
-        {/* AI 챗봇 */}
         <div className="w-3/4 p-2">
           <h2 className="text-2xl font-bold mb-2">AI 챗봇</h2>
           <div className="flex flex-col border border-gray-400 rounded-md" style={{ height: "800px" }}>
@@ -123,7 +121,6 @@ export default function AISearchPage() {
                 </div>
               )}
             </div>
-            {/* 검색바 */}
             <div className="flex p-4 border-t border-gray-300 dark:border-gray-700 flex-shrink-0">
               <input
                 type="text"

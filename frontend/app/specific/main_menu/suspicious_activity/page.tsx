@@ -7,31 +7,30 @@ export default function SuspiciousActivity() {
   const [suspicionData, setSuspicionData] = useState<Record<string, any> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState("score");
-  const [sortDirection, setSortDirection] = useState("desc");
-
+  const [sortBy, setSortBy] = useState<"score" | "ip" | "totalLogs" | "suspiciousCount">("score");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
   const analyzeLogs = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
-    
+
     try {
       const formData = new FormData();
       formData.append("filePath", filePath);
-      
-      const response = await fetch('http://localhost:8445/APIs/evaluate_suspicion_for_each_IP.php', {
+
+      const response = await fetch("http://localhost:8445/APIs/evaluate_suspicion_for_each_IP.php", {
         method: "POST",
         body: formData,
       });
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      
+
       const data = await response.json();
       setSuspicionData(data);
     } catch (err) {
-      setError((err as Error).message || "An unknown error occurred");
+      setError((err as Error).message || "알 수 없는 오류가 발생했습니다.");
       console.error("Error fetching data:", err);
     } finally {
       setIsLoading(false);
@@ -40,22 +39,21 @@ export default function SuspiciousActivity() {
 
   const getSortedIPs = () => {
     if (!suspicionData) return [];
-    
+
     return Object.entries(suspicionData)
       .sort(([ipA, dataA], [ipB, dataB]) => {
-        const valueA = (dataA as any)[sortBy];
-        const valueB = (dataB as any)[sortBy];
-        
+        const valA = dataA[sortBy];
+        const valB = dataB[sortBy];
+
         if (sortDirection === "asc") {
-          return valueA > valueB ? 1 : -1;
-        } else {
-          return valueA < valueB ? 1 : -1;
+          return valA > valB ? 1 : valA < valB ? -1 : 0;
         }
+        return valA < valB ? 1 : valA > valB ? -1 : 0;
       })
-      .map(([ip, data]) => ({ ip, ...data as any }));
+      .map(([ip, data]) => ({ ip, ...data }));
   };
 
-  const handleSort = (field: string) => {
+  const handleSort = (field: typeof sortBy) => {
     if (sortBy === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
@@ -79,7 +77,6 @@ export default function SuspiciousActivity() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Suspicious Activity Analysis</h1>
-      
       <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <h2 className="text-xl font-semibold mb-4">Analyze Log File</h2>
         <form onSubmit={analyzeLogs} className="flex flex-col md:flex-row gap-4">
@@ -118,30 +115,38 @@ export default function SuspiciousActivity() {
       {suspicionData && !isLoading && (
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
-          
-          <div className="mb-4">
-            <p className="text-gray-600">
-              Found {Object.keys(suspicionData).length} unique IP addresses in the logs.
-            </p>
-          </div>
-          
+          <p className="text-gray-600 mb-4">
+            Found {Object.keys(suspicionData).length} unique IP addresses in the logs.
+          </p>
+
           <div className="overflow-x-auto">
             <table className="min-w-full bg-white border border-gray-200">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort("ip")}>
+                  <th
+                    className="py-2 px-4 border-b cursor-pointer select-none"
+                    onClick={() => handleSort("ip")}
+                  >
                     IP Address {sortBy === "ip" && (sortDirection === "asc" ? "↑" : "↓")}
                   </th>
-                  <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort("score")}>
+                  <th
+                    className="py-2 px-4 border-b cursor-pointer select-none"
+                    onClick={() => handleSort("score")}
+                  >
                     Suspicion Score {sortBy === "score" && (sortDirection === "asc" ? "↑" : "↓")}
                   </th>
-                  <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort("totalLogs")}>
+                  <th
+                    className="py-2 px-4 border-b cursor-pointer select-none"
+                    onClick={() => handleSort("totalLogs")}
+                  >
                     Total Logs {sortBy === "totalLogs" && (sortDirection === "asc" ? "↑" : "↓")}
                   </th>
-                  <th className="py-2 px-4 border-b cursor-pointer" onClick={() => handleSort("suspiciousCount")}>
+                  <th
+                    className="py-2 px-4 border-b cursor-pointer select-none"
+                    onClick={() => handleSort("suspiciousCount")}
+                  >
                     Suspicious Logs {sortBy === "suspiciousCount" && (sortDirection === "asc" ? "↑" : "↓")}
                   </th>
-                  {/* <th className="py-2 px-4 border-b">Attack Types</th> */}
                   <th className="py-2 px-4 border-b">Details</th>
                 </tr>
               </thead>
@@ -150,35 +155,17 @@ export default function SuspiciousActivity() {
                   <tr key={item.ip} className="hover:bg-gray-50">
                     <td className="py-2 px-4 border-b">{item.ip}</td>
                     <td className="py-2 px-4 border-b">
-                      <div className={`flex items-center px-3 py-1.5 rounded-full border ${getSeverityClass(item.score)}`}>
+                      <div
+                        className={`flex items-center px-3 py-1.5 rounded-full border ${getSeverityClass(
+                          item.score
+                        )}`}
+                      >
                         {getSeverityIcon(item.score)}
                         {item.score.toFixed(2)}
                       </div>
                     </td>
                     <td className="py-2 px-4 border-b">{item.totalLogs}</td>
                     <td className="py-2 px-4 border-b">{item.suspiciousCount}</td>
-                    {/* <td className="py-2 px-4 border-b">
-                      {item.detectedAttacks && item.detectedAttacks.length > 0 ? (
-                        <details className="cursor-pointer">
-                          <summary className="text-blue-600 hover:text-blue-800">
-                            {item.detectedAttacks.length} type(s) detected
-                          </summary>
-                          <div className="mt-2 ml-4 text-sm">
-                            <ul className="list-disc ml-4 mt-2 text-gray-700">
-                              {item.detectedAttacks.map((attack: any, index: number) => (
-                                <li key={index} className="mb-2">
-                                  <div className="font-semibold">{attack.attackType}</div>
-                                  <div className="text-gray-600 ml-2">{attack.attackDetails}</div>
-                                  <div className="text-gray-500 ml-2 text-xs">Found in {attack.count} log(s)</div>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </details>
-                      ) : (
-                        <span className="text-gray-500 italic">None</span>
-                      )}
-                    </td> */}
                     <td className="py-2 px-4 border-b">
                       <details className="cursor-pointer">
                         <summary className="text-blue-600 hover:text-blue-800">
@@ -189,15 +176,22 @@ export default function SuspiciousActivity() {
                             <ul className="list-disc ml-4 mt-2 text-gray-700">
                               {item.suspiciousLogs.map((logItem: any, index: number) => (
                                 <li key={index} className="mb-3 break-all">
-                                  <code className="bg-gray-100 px-1 block mb-2">{typeof logItem === 'object' ? logItem.log : logItem}</code>
-                                  {typeof logItem === 'object' && logItem.detectedPatterns && (
+                                  <code className="bg-gray-100 px-1 block mb-2">
+                                    {typeof logItem === "object" ? logItem.log : logItem}
+                                  </code>
+                                  {typeof logItem === "object" && logItem.detectedPatterns && (
                                     <div className="mt-1 ml-2">
-                                      <p className="text-xs font-semibold text-gray-600">Detected patterns:</p>
+                                      <p className="text-xs font-semibold text-gray-600">
+                                        Detected patterns:
+                                      </p>
                                       <ul className="list-circle ml-4">
-                                        {logItem.detectedPatterns.map((pattern: any, patternIndex: number) => (
-                                          <li key={patternIndex} className="text-xs mt-1">
-                                            <span className="font-medium">{pattern.attackType}:</span> {pattern.attackDetails}
-                                            <div className="text-gray-500">Pattern: <code>{pattern.pattern}</code></div>
+                                        {logItem.detectedPatterns.map((pattern: any, idx: number) => (
+                                          <li key={idx} className="text-xs mt-1">
+                                            <span className="font-medium">{pattern.attackType}:</span>{" "}
+                                            {pattern.attackDetails}
+                                            <div className="text-gray-500">
+                                              Pattern: <code>{pattern.pattern}</code>
+                                            </div>
                                           </li>
                                         ))}
                                       </ul>

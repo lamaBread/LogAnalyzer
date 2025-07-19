@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import db from "@/app/lib/db"; // DB 연결 모듈
+import db from "@/app/lib/db";
 
 export async function POST(req: NextRequest) {
-  const { theme } = await req.json();  // 테마 값 받기
+  try {
+    const { theme } = await req.json();
 
-  // DB에 테마 업데이트 (사용자 설정에 맞게 업데이트)
-  await db.query('UPDATE settings SET theme = ? WHERE id = 1', [theme]);  // id는 예시입니다.
+    await db.query("UPDATE settings SET theme = ? WHERE id = 1", [theme]);
 
-  return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("테마 저장 실패:", error);
+    return NextResponse.json({ success: false, message: "테마 저장 실패" });
+  }
 }

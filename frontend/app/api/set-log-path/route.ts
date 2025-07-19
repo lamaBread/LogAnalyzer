@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import db from "@/app/lib/db"; // MySQL 연결
+import db from "@/app/lib/db";
 
 export async function POST(req: Request) {
   try {
@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error updating log path:", error);
+    console.error("로그 파일 경로 저장 실패:", error);
     return NextResponse.json({ success: false, message: "로그 파일 경로 저장 실패" });
   }
 }

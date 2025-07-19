@@ -3,7 +3,7 @@ import Link from "next/link";
 import "./globals.css";
 import { ThemeProvider } from "./context/ThemeContext";
 import LogoutButton from "./components/LogoutButton";
-import DarkModeToggle from "./components/darkmodetoggle"; // 클라이언트 컴포넌트
+import DarkModeToggle from "./components/darkmodetoggle";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -38,7 +38,7 @@ export default function RootLayout({
               </div>
               <div className="flex items-center space-x-4">
                 <LogoutButton />
-                <DarkModeToggle /> {/* 클라이언트 컴포넌트 */}
+                <DarkModeToggle />
               </div>
             </header>
             <main className="flex flex-1">

@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 
 export default function SearchPage() {
-  const [query, setQuery] = useState<string>(""); // 검색어 상태
-  const [results, setResults] = useState<string[]>([]); // 검색 결과 상태
-  const [history, setHistory] = useState<string[]>([]); // 검색 기록 (최대 10개)
-  const [loading, setLoading] = useState<boolean>(false); // 로딩 상태
-  const [error, setError] = useState<string | null>(null); // 에러 메시지 상태
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<string[]>([]);
+  const [history, setHistory] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSearch = async () => {
-    if (!query.trim() || query.length < 1) {
+    if (!query.trim()) {
       setError("검색어를 입력하세요.");
       return;
     }
@@ -21,27 +21,21 @@ export default function SearchPage() {
     try {
       const response = await fetch("http://localhost:8445/APIs/searchLogs.php", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `question=${encodeURIComponent(query)}`,
       });
 
       if (!response.ok) {
         throw new Error(`서버 응답 오류: ${response.status} ${response.statusText}`);
       }
-      
-      const responseText = await response.text();
-      console.log("Response Text:", responseText); // Log the response text
-  
-      const data = JSON.parse(responseText);
-      
-      setResults(data.length > 0 ? data : ["검색 결과가 없습니다."]);
 
-      // 검색 기록 추가 (최대 10개 유지)
+      const responseText = await response.text();
+      const data = JSON.parse(responseText);
+
+      setResults(Array.isArray(data) && data.length > 0 ? data : ["검색 결과가 없습니다."]);
       setHistory((prev) => {
-        const updatedHistory = [query, ...prev.filter((item) => item !== query)].slice(0, 10);
-        return updatedHistory;
+        const filtered = prev.filter((item) => item !== query);
+        return [query, ...filtered].slice(0, 10);
       });
     } catch (err) {
       console.error("검색 중 오류 발생:", err);
@@ -85,10 +79,12 @@ export default function SearchPage() {
       {loading && <p>로딩 중...</p>}
       {error && <p className="text-red-500">{error}</p>}
 
-      {/* 검색 결과 */}
-      <div className="mt-6">
+      <section className="mt-6">
         <h2 className="text-2xl font-bold mb-2">검색 결과</h2>
-        <div className="overflow-y-auto border border-gray-400 rounded-md" style={{ maxHeight: "500px" }}>
+        <div
+          className="overflow-y-auto border border-gray-400 rounded-md"
+          style={{ maxHeight: 500 }}
+        >
           {results.length > 0 ? (
             <table className="table-auto w-full border-collapse text-xl">
               <tbody>
@@ -106,15 +102,17 @@ export default function SearchPage() {
             <p className="p-4">검색 결과가 없습니다.</p>
           )}
         </div>
-      </div>
+      </section>
 
-      {/* 검색 기록 */}
       {history.length > 0 && (
-        <div className="mt-6">
+        <section className="mt-6">
           <h2 className="text-2xl font-bold mb-2">검색 기록</h2>
           <ul className="text-lg">
             {history.map((item, index) => (
-              <li key={index} className="flex justify-between items-center border-b py-2">
+              <li
+                key={index}
+                className="flex justify-between items-center border-b py-2"
+              >
                 <span>{item}</span>
                 <button
                   onClick={() => handleDeleteHistory(index)}
@@ -125,7 +123,7 @@ export default function SearchPage() {
               </li>
             ))}
           </ul>
-        </div>
+        </section>
       )}
     </div>
   );

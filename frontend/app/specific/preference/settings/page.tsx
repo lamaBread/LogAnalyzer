@@ -1,62 +1,66 @@
 "use client";
 
 import { useState } from "react";
-import { useTheme } from "../../../context/ThemeContext"; // ThemeContext에서 useTheme 가져오기
-import DarkModeToggle from "../../../components/darkmodetoggle"; // 경로를 실제 경로로 수정
+import { useTheme } from "../../../context/ThemeContext";
+import DarkModeToggle from "../../../components/darkmodetoggle";
 
 export default function SettingsPage() {
-  const { theme, setTheme } = useTheme(); // useTheme 훅을 사용하여 테마 상태 관리
+  const { theme, setTheme } = useTheme();
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [font, setFont] = useState("sans-serif");
   const [fontSize, setFontSize] = useState("16px");
   const [logPath, setLogPath] = useState("");
   const [reportEmail, setReportEmail] = useState("");
-
-  // 비밀번호 변경 처리 함수
   const handleChangePassword = async () => {
-    const res = await fetch("/api/change-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ currentPassword, newPassword }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert("비밀번호가 변경되었습니다!");
-      setCurrentPassword("");
-      setNewPassword("");
-    } else {
-      alert("비밀번호 변경 실패: " + data.message);
+    try {
+      const res = await fetch("/api/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("비밀번호가 변경되었습니다!");
+        setCurrentPassword("");
+        setNewPassword("");
+      } else {
+        alert("비밀번호 변경 실패: " + data.message);
+      }
+    } catch (error) {
+      alert("비밀번호 변경 중 오류가 발생했습니다.");
+      console.error(error);
     }
   };
 
-  // 로그 파일 경로 저장 함수
-  const handleLogPathSave = async () => {
-    const res = await fetch("/api/set-log-path", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ logPath }),
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert("로그 파일 경로가 저장되었습니다!");
-    } else {
-      alert("오류 발생: " + data.message);
+  const handleSaveLogPath = async () => {
+    try {
+      const res = await fetch("/api/set-log-path", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ logPath }),
+      });
+      const data = await res.json();
+      alert(data.success ? "로그 파일 경로가 저장되었습니다!" : "오류 발생: " + data.message);
+    } catch (error) {
+      alert("로그 경로 저장 중 오류가 발생했습니다.");
+      console.error(error);
     }
   };
 
-  // 보고서 받을 이메일 저장 함수
-  const handleReportEmailSave = async () => {
-    const res = await fetch("https://your-api-endpoint.com/save-email.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({ email: reportEmail }).toString(),
-    });
-    const data = await res.json();
-    if (data.success) {
-      alert("이메일이 저장되었습니다!");
-    } else {
-      alert("오류 발생: " + data.message);
+  const handleSaveReportEmail = async () => {
+    try {
+      const res = await fetch("https://your-api-endpoint.com/save-email.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({ email: reportEmail }).toString(),
+      });
+      const data = await res.json();
+      alert(data.success ? "이메일이 저장되었습니다!" : "오류 발생: " + data.message);
+    } catch (error) {
+      alert("이메일 저장 중 오류가 발생했습니다.");
+      console.error(error);
     }
   };
 
@@ -64,8 +68,7 @@ export default function SettingsPage() {
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <h1 className="text-2xl font-bold">설정</h1>
 
-      {/* 비밀번호 변경 */}
-      <div className="space-y-2">
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">비밀번호 변경</h2>
         <input
           type="password"
@@ -81,19 +84,20 @@ export default function SettingsPage() {
           onChange={(e) => setNewPassword(e.target.value)}
           className="w-full p-2 border rounded"
         />
-        <button onClick={handleChangePassword} className="px-4 py-2 bg-gray-600 text-white rounded">
+        <button
+          onClick={handleChangePassword}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+        >
           변경
         </button>
-      </div>
+      </section>
 
-      {/* 화면 테마 */}
-      <div className="space-y-2">
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">화면 테마</h2>
         <DarkModeToggle />
-      </div>
+      </section>
 
-      {/* 글꼴 및 글씨 크기 설정 */}
-      <div className="flex space-x-4">
+      <section className="flex space-x-4">
         <div className="space-y-2 w-1/2">
           <h2 className="text-lg font-semibold">글꼴 설정</h2>
           <select
@@ -120,25 +124,26 @@ export default function SettingsPage() {
             <option value="20px">매우 크게</option>
           </select>
         </div>
-      </div>
+      </section>
 
-      {/* 로그 파일 경로 */}
-      <div className="space-y-2">
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">로그 파일 경로</h2>
         <input
           type="text"
-          placeholder="예: C:\ProgramData\YourAppName\logs"
+          placeholder="예: C:\\ProgramData\\YourAppName\\logs"
           value={logPath}
           onChange={(e) => setLogPath(e.target.value)}
           className="w-full p-2 border rounded dark:text-black"
         />
-        <button onClick={handleLogPathSave} className="px-4 py-2 bg-gray-600 text-white rounded">
+        <button
+          onClick={handleSaveLogPath}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+        >
           저장
         </button>
-      </div>
+      </section>
 
-      {/* 보고서 빋을 이메일 전송 */}
-      <div className="space-y-2">
+      <section className="space-y-2">
         <h2 className="text-lg font-semibold">보고서 받을 이메일</h2>
         <input
           type="email"
@@ -147,10 +152,13 @@ export default function SettingsPage() {
           onChange={(e) => setReportEmail(e.target.value)}
           className="w-full p-2 border rounded dark:text-black"
         />
-        <button onClick={handleReportEmailSave} className="px-4 py-2 bg-gray-600 text-white rounded">
+        <button
+          onClick={handleSaveReportEmail}
+          className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition"
+        >
           제출
         </button>
-      </div>
+      </section>
     </div>
   );
 }

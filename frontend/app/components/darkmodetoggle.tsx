@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
-import { useTheme } from "../context/ThemeContext"; // ThemeContext에서 useTheme 가져오기
+import { useTheme } from "../context/ThemeContext";
 
 export default function DarkModeToggle() {
-  const { theme, setTheme } = useTheme();  // theme과 setTheme 가져오기
+  const { theme, setTheme } = useTheme();
 
   useEffect(() => {
     const savedMode = localStorage.getItem("darkMode");
@@ -15,7 +15,7 @@ export default function DarkModeToggle() {
       setTheme("light");
       document.documentElement.classList.remove("dark");
     }
-  }, [setTheme]);  // setTheme을 의존성 배열에 추가
+  }, [setTheme]);
 
   const toggleDarkMode = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -33,7 +33,8 @@ export default function DarkModeToggle() {
   return (
     <button
       onClick={toggleDarkMode}
-      className="px-2 py-2 bg-white-500 text-white rounded hover:bg-gray-600 transition-colors"
+      className="px-2 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+      aria-label="Toggle Dark Mode"
     >
       {theme === "light" ? "🌙" : "☀"}
     </button>
